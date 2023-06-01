@@ -1,0 +1,233 @@
+#!/bin/bash -l
+
+#SBATCH --account=nn9481k --qos=preproc
+#
+#SBATCH -J  TP2_ave
+
+### System message output file
+#SBATCH -o log/hycompost.JNAME.out
+#
+### System error message file
+#SBATCH -e log/hycompost.JNAME.err
+#
+### How long job takes, wallclock time hh:mm:ss
+#SBATCH -t 00:55:00
+#
+### Usage  ------------
+### Firstly: Calculate the daily averages according to the defined elements in the ensemble directory
+###          rename the avarege files and moving under the main data directory
+###          The outputs of from both the hycom and the cice 
+###
+### Secondly: rename the resart and iced files according to the member in the ensemble
+### 
+### Thirdly:  cleaning the member directory and keep the log files for each element running
+### 
+###   For example:
+###                    sbatch sr_ensemble_post.sh 1 44
+###-------------------------------------------------------------------------
+#
+## Initialize environment (sets Scratch dir ($S), Data dir $D ++ )
+source ../REGION.src  || { echo "Could not source ../REGION.src "; exit 1; }
+source ./EXPT.src  || { echo "Could not source EXPT.src"; exit 1; }
+
+
+if [ "$1" -gt "-1" -a "$2" -gt "-1" ]; then
+  mem1=$1
+  mem2=$2
+  (( Nens=mem2-mem1+1 ))
+  echo 'mems: ' $1 '~' $2 ': ' ${Nens}
+else
+  echo "requires input about mem1 and mem2"
+  exit $? 
+fi
+
+# IdxDir
+#IdxDir=~/NERSC-HYCOM-CICE/hycom/hycom_ALL/hycom_2.2.72_ALL/meanstd/src
+IdxDir=PROPDIR
+
+# Enter directory from where the job was submitted
+cd $SLURM_SUBMIT_DIR       ||  { echo "Could not go to dir $SLURM_O_WORKDIR  "; exit 1; }
+echo $SLURM_SUBMIT_DIR 
+
+idaily=1       # calcuate the daily mean from the ensemble
+irestart=1     # rename the restart and iced files in the ensemble
+iclean=0      # rename the restart and iced files in the ensemble switch on/off for debuging
+
+## Step 1: 
+# initial daily 
+cmem0=mem`echo 00${mem1}|tail -4c`
+cd ${S}
+Flist0=listdaily.hycom
+Flist1=listdaily.cice
+find ../${cmem0}/data/ -maxdepth 1 -name 'archm.*.a' > ${Flist0}
+find ../${cmem0}/data/cice/ -maxdepth 1 -name 'iceh.*-*-*.nc' > ${Flist1}
+
+if [ -r ${Flist0} -a -r ${Flist1} -a ${idaily} -eq 1 ]; then
+   # 1.1 hycom daily average
+   echo "Ensemble mean for hycom result ..."
+   Nl1=$(sed -n '$=' ${Flist0})
+   for ii in `seq 1 ${Nl1}`; do
+      Fline0=$(sed -n "${ii}p" ${Flist0})
+      dailybase=archm.$(echo ${Fline0} | sed "s/.[ab]$//" | sed "s/.*archm.//")
+      Fmean=meanhycom_${ii}.in
+      [ -r ${Fmean} ] && rm ${Fmean}
+
+      N0=0
+      for imm in `seq ${mem1} ${mem2}`; do
+         cmem1=mem`echo 00${imm}|tail -4c`
+         Finia=${Fline0/${cmem0}/${cmem1}}
+         Finib=${Finia:0:end-1}b
+         if [ -r ${Finia} -a -r ${Finib} ]; then
+            echo ${Finia}
+            (( N0 = N0 + 1 ))
+         fi
+      done
+
+      cat ${IdxDir}/FILES/mean_hycom.in.head | sed "s/NN/${N0}/g"  > ${Fmean} 
+      for imm in `seq ${mem1} ${mem2}`; do
+         cmem1=mem`echo 00${imm}|tail -4c`
+         Finia=${Fline0/${cmem0}/${cmem1}}
+         Finib=${Finia:0:end-1}b
+         if [ -r ${Finia} -a -r ${Finib} ]; then
+            echo ${Finia} >> ${Fmean}
+            # debug the SSH component
+            /cluster/home/xiejp/NERSC-HYCOM-CICE/bin/hycom_plot_archive.py srfhgt 0 ${Finia}
+            if [ -r srfhgt_0_000.png ]; then
+               mv srfhgt_0_000.png ../data/srfhgt_$ii_$imm.png
+            fi
+         fi
+      done
+
+      #echo $(sed -n '$=' ${Fmean})
+      if [ $N0 -gt 3 ]; then
+         echo "calculating the daily by one ensemble"
+         echo "   0     'narchs' = number of archives to read (==0 to end input)" >> ${Fmean}
+         echo "${dailybase}" >> ${Fmean}
+         ${IdxDir}/BIN/hycom_mean < ${Fmean}
+         if [ -r ${dailybase}.a -a -r ${dailybase}.b ]; then
+            mv ${dailybase}.[ab] ../data/.
+         fi
+         # prepare the ensemble SSH
+         echo "extracting the SSH and save to ensemble .uf file"
+         ${IdxDir}/BIN/extract2ssh ${N0} ${Fmean}
+         if [ -r SSHDAILY.uf ]; then
+            mv SSHDAILY.uf ../data/${dailybase}_SSH.uf
+         fi
+      fi
+      echo "HYCOM: done $ii"
+   done
+
+
+   # 1.2 cice daily average
+   module load NCO/4.6.6-intel-2017a
+   echo "Ensemble mean for cice result ..."
+   Nl2=$(sed -n '$=' ${Flist1})
+   for ii in `seq 1 ${Nl1}`; do
+      Fline0=$(sed -n "${ii}p" ${Flist1})
+      echo ${Fline0}
+      icehbase=iceh.$(echo ${Fline0} | sed "s/.*iceh.//")
+      Fmean=meancice_${ii}.in
+      [ -r ${Fmean} ] && rm ${Fmean}
+      for imm in `seq ${mem1} ${mem2}`; do
+         cmem1=mem`echo 00${imm}|tail -4c`
+         Fmemnc=${Fline0/${cmem0}/${cmem1}}
+         if [ -r ${Fmemnc} ]; then
+            echo ${Fmemnc} >> ${Fmean}
+         fi
+      done
+      N0=$(sed -n '$=' ${Fmean})
+      if [ $N0 -gt 1 ]; then
+         Fice=$(cat ${Fmean})
+         ncea ${Fice} out0.nc
+         if [ -r out0.nc ]; then
+            mv out0.nc ../data/cice/${icehbase}
+         fi
+      fi
+      echo "CICE: done $ii"
+   done
+   mv meancice_*.in ../log/.
+   mv meanhycom_*.in ../log/.
+   rm ${Flist0} ${Flist1}
+fi
+
+## Step 2: 
+# rename the foreward initial conditions
+cmem0=mem`echo 00${mem1}|tail -4c`
+cd ${S}
+Flist0=list.restart
+Flist1=list.iced
+find ../${cmem0}/data/ -maxdepth 1 -name 'restart.*.a' > ${Flist0}
+find ../${cmem0}/data/cice/ -maxdepth 1 -name 'iced.*-*-00000.nc' > ${Flist1}
+
+if [ -r ${Flist0} -a -r ${Flist1} -a ${irestart} -eq 1 ]; then
+   echo "Prepare the initial condition for each member ..."
+   # 2.1 hycom restart 
+   Nl1=$(sed -n '$=' ${Flist0})
+   for ii in `seq 1 ${Nl1}`; do
+      Fline0=$(sed -n "${ii}p" ${Flist0})
+      hycombase=restart.$(echo ${Fline0} | sed "s/.*restart.//" | sed "s/\.[ab]//")
+      for imm in `seq ${mem1} ${mem2}`; do
+         cmem1=mem`echo 00${imm}|tail -4c`
+         Finia=${Fline0/${cmem0}/${cmem1}}
+         Finib=${Finia:0:end-1}b
+         if [ -r ${Finia} -a -r ${Finib} ]; then
+            echo "moving ${Finia} to" ../data/${hycombase}_${cmem1}.a
+            mv ${Finia} ../data/${hycombase}_${cmem1}.a
+            echo "moving ${Finib} to" ../data/${hycombase}_${cmem1}.b
+            mv ${Finib} ../data/${hycombase}_${cmem1}.b
+         fi
+      done
+   done
+
+   # 1.2 cice at 0 Oclock 
+   Nl2=$(sed -n '$=' ${Flist1})
+   for ii in `seq 1 ${Nl2}`; do
+      Fline0=$(sed -n "${ii}p" ${Flist1})
+      icebase=iced.$(echo ${Fline0} | sed "s/.*iced.//" | sed "s/.nc//")
+      echo ${icebase}
+      for imm in `seq ${mem1} ${mem2}`; do
+         cmem1=mem`echo 00${imm}|tail -4c`
+         Fmemnc=${Fline0/${cmem0}/${cmem1}}
+         if [ -r ${Fmemnc} ]; then
+            echo "moving ${Fmemnc} to" ../data/${icebase}_${cmem1}.nc
+            mv ${Fmemnc} ../data/cice/${icebase}_${cmem1}.nc
+         fi
+      done
+   done
+   rm ${Flist0} ${Flist1}
+fi
+
+## Step 3: 
+# clearn the present directory 
+if [ ${iclean} -eq 1 ]; then
+   echo "clean all the memeber results"
+   cd ${P} 
+   for imm in `seq ${mem1} ${mem2}`; do
+      cmem1=mem`echo 00${imm}|tail -4c`
+      [ -r ./${cmem1} ] && rm -rf ${cmem1}
+   done
+   # clean the restart file under $S
+   Flist=list.clean
+   find ./${S} -maxdepth 1 -name 'restart.*.?' > ${Flist}
+   Nl1=$(sed -n '$=' ${Flist})
+   if [ $Nl1 -gt 0 ]; then
+      for ii in `seq 1 ${Nl1}`; do
+         Fline0=$(sed -n "${ii}p" ${Flist})
+         Fini=$(readlink -f ${Fline0})
+         rm ${Fini}
+      done
+   fi
+   Flist=list.clean
+   find ./${S}/cice -maxdepth 1 -name 'iced.*.nc' > ${Flist}
+   Nl1=$(sed -n '$=' ${Flist})
+   if [ $Nl1 -gt 0 ]; then
+      for ii in `seq 1 ${Nl1}`; do
+         Fline0=$(sed -n "${ii}p" ${Flist})
+         Fini=$(readlink -f ${Fline0})
+         rm ${Fini}
+      done
+   fi
+   rm ${Flist} 
+fi
+
+exit $?

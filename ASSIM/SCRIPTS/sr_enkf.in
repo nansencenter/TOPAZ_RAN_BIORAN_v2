@@ -1,0 +1,115 @@
+#!/bin/bash
+#
+# Project:
+#!SBATCH --account=nn2993k --qos=short
+#SBATCH --account=nn2993k --qos=devel
+#
+# Job name:
+#SBATCH -J "Nenkf"
+#
+#SBATCH -N 1 
+#SBATCH --exclusive
+#
+# design the input parameters for Nproc=16 
+##SBATCH --nodes=1 --ntasks-per-node=8 --cpus-per-task=1
+##SBATCH --mem-per-cpu=4GB
+#
+# Wall clock limit
+#SBATCH -t 01:00:00
+##SBATCH -t 02:00:00
+#
+#SBATCH -o enkf_0.out
+#SBATCH -e enkf_0.err
+
+# set up job environment
+set -e # exit on error
+set -u # exit on unset variables
+
+
+ANALYSISDIR=EXVAR1
+BINDIR=EXVAR0
+
+ENSSIZE=EXVAR2
+NPROC=EXVAR3
+
+
+cd ${ANALYSISDIR}
+
+srun --mpi=pmi2 -n ${NPROC} ${BINDIR}/EnKF enkf.prm
+
+status=`cat ${ANALYSISDIR}/enkf_0.out | grep EnKF: | grep -c Finished`
+if (( ${status} != ${NPROC} ))
+then
+   echo
+   echo "ERROR: EnKF has not finished"
+   echo "       Please try again after check!"
+   echo
+   exit 1
+else
+   echo "   EnKF finished"
+fi
+
+
+# assembling the analyzed field into .ab file
+e0=0
+for (( e = 1; e <= ${ENSSIZE}; ++e ))
+do
+    mem=`printf "%03d\n" $e`
+
+    # assemble
+    #
+    if [ ! -f "analysis${mem}.a" ]
+    then
+        echo "${BINDIR}/EnKF_assemble.sh forecast${mem}.a forecastICE.uf ${e} ${NPROC}"
+        ${BINDIR}/EnKF_assemble.sh forecast${mem}.a forecastICE.uf ${e} ${NPROC} &
+        if [ $? -ne 0 ]
+        then
+            echo "ERROR: EnKF_assemble.sh failed for member ${e}"
+            exit 1;
+        fi
+        (( e0 = e0 + 1 ))
+    else
+        echo "no need to assemble member ${e}: analysis${mem}.a already exists"
+    fi
+
+done
+wait
+
+# double check all the member files are ready
+istep=1
+while [ $istep -gt 0 ]; do
+   ${BINDIR}/Checkmem.sh ${ENSSIZE} analysis .a
+   Ftemp=Checkmem_analysis_0.log
+   if [ -s ${Ftemp} ]; then
+      tmpsize=$(stat -c%s ${Ftemp})
+      if [ "$tmpsize" -gt 1 ]; then
+         Fnams=$(cat ${Ftemp})
+         for inam in ${Fnams} ; do
+            ${BINDIR}/EnKF_assemble.sh forecast${inam}.a forecastICE.uf ${inam} ${NPROC} &
+         done
+         wait
+         sleep 1
+         ${BINDIR}/Checkmem.sh ${ENSSIZE} analysis .a
+         [ ! -s ${Ftemp} ] && istep=-1
+      else
+         istep=-1
+      fi
+   else
+      istep=-1
+   fi
+done
+echo "Double check done!"
+
+if [ $e0 -eq ${ENSSIZE} ]; then
+   for (( e = 1; e <= ${ENSSIZE}; ++e ))
+   do
+      mem=`printf "%03d\n" $e`
+      rm -f analysis${mem}_proc???.?
+   done
+fi
+
+
+
+
+
+

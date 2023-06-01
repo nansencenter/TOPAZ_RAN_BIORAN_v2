@@ -1,0 +1,4 @@
+IFREMER
+OTY                       ! SAL | TEM
+OVAR                      ! observation error variance
+JDATE_coriolis.nc         ! observed file-name

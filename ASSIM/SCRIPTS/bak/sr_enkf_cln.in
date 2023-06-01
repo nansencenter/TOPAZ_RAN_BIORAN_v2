@@ -1,0 +1,317 @@
+#!/bin/bash -l
+#
+# Job name:
+#SBATCH -J "enkf_m"
+#
+#SBATCH -N NCODE 
+#SBATCH --exclusive
+#
+# Max memory usage:
+##SBATCH --mem-per-cpu=2G
+#
+# Wall clock limit:
+#SBATCH -t 08:00:00
+#
+#SBATCH -o enkf_m.out
+#SBATCH -e enkf_m.err
+
+#SBATCH  --mail-type=END
+#SBATCH --mail-user=jiping.xie@nersc.no
+
+
+# set up job environment
+set -e # exit on error
+set -u # exit on unset variables
+set -x
+
+BINDIR=EXVAR0
+ANALYSISDIR=EXVAR1
+ENSSIZE=EXVAR2
+NPROCA=EXVAR3
+
+RESULTSDIR=EXVAR_2
+JULDAY=EXVAR_3
+
+module purge
+module load 2019
+module load NCL
+module load FFTW/3.3.8-intel-2018b
+module load ncview/2.1.7-intel-2018b
+module load CDO/1.9.5-intel-2018b
+
+
+
+cd "${ANALYSISDIR}"
+
+NPROC=20
+(( NN = ($ENSSIZE - 1 ) / $NPROC + 1 ))
+for icycl in `seq 1 $NN`; do
+   i1=0
+   i2=0
+   for iproc in `seq 1 ${NPROC}`; do
+      (( imem = $iproc + ( $icycl - 1 ) * $NPROC ))
+      if [ $imem -le ${ENSSIZE} ]; then
+         [ $i1 -eq 0 ] && (( i1 = $imem ))
+         (( i2 = $imem ))
+         cmem=`printf "%03d\n" $imem`
+         Fini=forecast${cmem}
+         echo "srun -n 1 ${BINDIR}/restart2nc ${Fini}.a"
+         #srun -N 1 -n 1 ${BINDIR}/restart2nc ${Fini}.a &
+         srun -n 1 ${BINDIR}/restart2nc ${Fini}.a &
+      fi
+   done
+   wait
+done
+
+istep=1
+
+# Step 1: checking all the missing files and reprocessing :
+while [ $istep -gt 0 ]; do
+  Ftemp=Checkmem_forecast_0.log
+  ${BINDIR}/Checkmem.sh ${ENSSIZE}
+  if [ -s ${Ftemp} ]; then
+     tmpsize=$(stat -c%s ${Ftemp})
+     if [ "$tmpsize" -gt 1 ]; then
+        Fnams=$(cat ${Ftemp})
+        for inam in ${Fnams} ; do
+           ${BINDIR}/restart2nc forecast${inam}.a  &
+        done
+        wait
+        sleep 1 
+	rm ${Ftemp}
+        ${BINDIR}/Checkmem.sh ${ENSSIZE}
+        [ ! -s ${Ftemp} ] && istep=-1
+     else
+        istep=-1
+     fi   
+  else
+     istep=-1
+  fi
+done
+date
+echo "Continue to do enkf ..."
+
+#(( EPROC = $NPROC - 1 ))
+EPROC=4
+srun --mpi=pmi2 -N ${EPROC} -n ${NPROCA} ${BINDIR}/EnKF enkf.prm & 
+#srun -N ${EPROC} -n ${NPROCA} ${BINDIR}/EnKF enkf.prm & 
+
+echo "mean of forecast ..."
+srun -N1 -n1 cdo ensmean forecast???.nc forecast.nc &
+
+   
+wait
+
+grep "EnKF: Finished" enkf_m.out > enkf.log
+MM=`wc -l enkf.log | awk '{print $1}'`
+if [ $MM -lt ${NPROCA} ]; then
+   echo "Only finishied : $MM"
+   echo "exit enkf for some reason!"
+   exit
+fi
+
+
+echo "enkf has done and then postprocess ..."
+echo "$(date)"
+echo $(pwd)
+if [ -s forecast.nc ]; then
+   cp forecast001.nc forecast.nc ${RESULTSDIR}/${JULDAY}/FORECAST
+fi
+
+
+# step 1: assemble
+for icycl in `seq 1 $NN`; do
+   i1=0
+   i2=0
+   for iproc in `seq 1 ${NPROC}`; do
+      (( imem = $iproc + ( $icycl - 1 ) * $NPROC ))
+      if [ $imem -le ${ENSSIZE} ]; then
+         [ $i1 -eq 0 ] && (( i1 = $imem ))
+         (( i2 = $imem ))
+         cmem=`printf "%03d\n" $imem`
+         Fini=analysis${cmem}
+         if [ ! -f "${Fini}.a" ]; then
+            echo "${BINDIR}/EnKF_assemble.sh forecast${cmem}.a forecastICE.uf ${imem} ${NPROCA}"
+            srun -n 1 ${BINDIR}/EnKF_assemble.sh forecast${cmem}.a forecastICE.uf ${imem} ${NPROCA} &
+         else
+            echo "no need to assemble member ${imem}: analysis${cmem}.a already exists"
+         fi
+      fi
+   done
+   echo "submit tasks of assembling: " $i1 "-" $i2
+   wait
+
+#   # check for consistency
+#   echo "${BINDIR}/consistency  "
+#   for imem in `seq $i1 $i2`; do
+#      cmem=`printf "%03d\n" $imem`
+#      Fini=analysis${cmem}
+#      srun -N 1 -n 1 ${BINDIR}/consistency analysis${cmem}.a  &
+#   done
+#   wait
+
+
+   echo "${BINDIR}/fixhycom "
+   for imem in `seq $i1 $i2`; do
+      cmem=`printf "%03d\n" $imem`
+      Fini=fixanalysis${cmem}
+      if [ ! -f "${Fini}.a" ]; then
+         echo "${BINDIR}/fixhycom analysis${cmem}.a ${imem} analysisICE.uf"
+         srun  -n 1 ${BINDIR}/fixhycom analysis${cmem}.a ${imem} analysisICE.uf &
+      else
+         echo "no need to fixhycom member ${imem}: fixanalysis${cmem}.a already exists"
+      fi
+   done
+   echo "submit tasks of fixhycom: " $i1 "-" $i2
+   wait
+
+   for imem in `seq $i1 $i2`; do
+      cmem=`printf "%03d\n" $imem`
+      mv tmp${cmem}.b fixanalysis${cmem}.b
+   done
+
+
+   for imem in `seq $i1 $i2`; do
+      cmem=`printf "%03d\n" $imem`
+      Fini=fixanalysis${cmem}
+      if [ ! -f "${Fini}.nc" ]; then
+         echo "${BINDIR}/restart2nc fixanalysis${cmem}.a"
+         srun  -n 1 ${BINDIR}/restart2nc fixanalysis${cmem}.a &
+      else
+         echo "no need to restart2nc member ${imem}: fixanalysis${cmem}.nc already exists"
+      fi
+   done
+   echo "submit tasks of restart2nc: " $i1 "-" $i2
+
+   wait
+
+done
+
+
+echo "mean of fixanalysis ..."
+date   
+
+srun -N1 -n1 cdo ensmean fixanalysis???.nc analysis.nc &
+
+wait
+
+mv fixanalysis001.nc analysis001.nc
+cp analysis001.nc analysis.nc ${RESULTSDIR}/${JULDAY}/ANALYSIS
+
+#rm -f consistency_analysis*.nc
+
+iclean=1
+if [ $iclean -eq 1 ]; then
+   echo "Cleaning the analysis results  ..."
+   HYCOMPREFIX=MODNAM
+   MODELDIR=MODDIR
+   FORECASTDIR=MODDATA
+   BACKUPBUFDIR=MODBAK
+
+# move the forecast ensemble to the backup buffer
+# replace the forecast enamble with the analysed ensemble
+#
+if [ -f "./observations.uf" ]
+then
+   cp enkf_*.nc observations-*.nc ${RESULTSDIR}/${JULDAY}/ANALYSIS
+
+#   Lfiles="icevolume.txt SAL.nc TEM.nc"
+   Lfiles="TP4icevolume.dat SAL.nc TEM.nc"
+
+   for ifile in ${Lfiles} ; do
+      if [ -f "./${ifile}" ]; then
+         cp ${ifile} ${RESULTSDIR}/${JULDAY}/ANALYSIS
+      fi
+   done
+
+   echo "Copying the analysed ensemble to the model directory..."
+
+   for icycl in `seq 1 $NN`; do
+      i1=0
+      i2=0
+      for iproc in `seq 1 ${NPROC}`; do
+         (( imem = $iproc + ( $icycl - 1 ) * $NPROC ))
+         if [ $imem -le ${ENSSIZE} ]; then
+            [ $i1 -eq 0 ] && (( i1 = $imem ))
+            (( i2 = $imem ))
+         fi
+      done
+      for e in `seq $i1 $i2`; do
+         mem=`printf "%03d\n" ${e}`
+         target=`readlink -e ${ANALYSISDIR}/forecast${mem}.b`
+         # move .b forecast file from model directory to backup
+         mv ${target} -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+         # move .b analysis file to model directory
+         mv fixanalysis${mem}.b ${target}
+         cp ${target} ${BACKUPBUFDIR}/ANALYSIS
+
+         target=`readlink -e ${ANALYSISDIR}/forecast${mem}.a`
+         # move .a forecast file from model directory to backup
+         mv ${target} -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+         # move .a analysis file to model directory
+         mv fixanalysis${mem}.a ${target}
+         srun  -n 1 cp ${target} -t ${BACKUPBUFDIR}/ANALYSIS &
+      done
+      wait
+   done
+
+   # add AVE file
+   Nlen=${#target}
+   Fave=${target:0:Nlen-9}AVE
+   echo "FAVE= " ${Fave}
+   if [ -r ${Fave}.a -a -r ${Fave}.b ]; then
+      cp ${Fave}.a ${BACKUPBUFDIR}/ANALYSIS/.
+      cp ${Fave}.b ${BACKUPBUFDIR}/ANALYSIS/.
+      cp ${Fave}.a ${BACKUPBUFDIR}/${JULDAY}/FORECAST/.
+      cp ${Fave}.b ${BACKUPBUFDIR}/${JULDAY}/FORECAST/.
+   fi
+else
+   echo "Linking the forecast ensemble to the output directory..."
+   [ ! -d "${BACKUPBUFDIR}/${JULDAY}/FORECAST" ] && mkdir -p ${BACKUPBUFDIR}/${JULDAY}
+   for (( e = 1; e <= ${ENSSIZE}; ++e ))
+   do
+      mem=`printf "%03d\n" ${e}`
+      target=`readlink -e ${ANALYSISDIR}/forecast${mem}.a`
+      # move .a forecast file from model directory to backup
+      ln -f ${target} -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+
+      target=`readlink -e ${ANALYSISDIR}/forecast${mem}.b`
+      # move .b forecast file from model directory to backup
+      ln -f ${target} -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+   done
+fi
+###
+cp ${MODELDIR}/SCRATCH/${HYCOMPREFIX}icevolume.dat -t ${RESULTSDIR}/${JULDAY}/FORECAST
+cat ${MODELDIR}/SCRATCH/${HYCOMPREFIX}icevolume.dat | awk '{if (NF == 5) print $0}' | sort -k 2,2n -k 1,1n > ${RESULTSDIR}/${JULDAY}/FORECAST/icevolume-filtered.txt
+
+ln -f ${FORECASTDIR}/${HYCOMPREFIX}DAILY_*.* -t ${OUTPUTDIR}/${JULDAY}
+if stat -t ${FORECASTDIR}/${HYCOMPREFIX}AVE_*.[a,b] > /dev/null 2>&1
+then
+   ln -f ${FORECASTDIR}/${HYCOMPREFIX}AVE_*.[a,b] -t ${OUTPUTDIR}/${JULDAY}
+fi
+
+if stat -t ${FORECASTDIR}/${HYCOMPREFIX}DAILY_*.* > /dev/null 2>&1
+then
+   mv ${FORECASTDIR}/${HYCOMPREFIX}DAILY_*.* -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+fi
+
+if stat -t ${FORECASTDIR}/${HYCOMPREFIX}AVE_*.[a,b] > /dev/null 2>&1
+then
+   mv ${FORECASTDIR}/${HYCOMPREFIX}*AVE_*.[a,b] -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+fi
+
+cp ${MODELDIR}/SCRATCH/${HYCOMPREFIX}icevolume.dat -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+if stat -t ${ANALYSISDIR}/*.err > /dev/null 2>&1
+then
+   cp -rf ${ANALYSISDIR}/*.err ${ANALYSISDIR}/*.out -t ${RESULTSDIR}/${JULDAY}/LOG
+fi
+
+if stat -t ${MODELDIR}/*.err > /dev/null 2>&1
+then
+   mv -rf ${MODELDIR}/log/* -t ${RESULTSDIR}/${JULDAY}/LOG
+fi
+###
+
+fi
+echo "FINISHED"
+

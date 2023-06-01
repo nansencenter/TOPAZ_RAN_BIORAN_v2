@@ -1,0 +1,108 @@
+#!/bin/bash -l
+
+export SLURM_SUBMIT_DIR=$(pwd)
+cd $SLURM_SUBMIT_DIR       ||  { echo "Could not go to dir $SLURM_SUBMIT_DIR  "; exit 1; }
+
+# ------------------- Fetch Environment ------------------------------
+# Initialize environment (sets Scratch dir ($S), Data dir $D ++ )
+source ../REGION.src  || { echo "Could not source ../REGION.src "; exit 1; }
+source ./EXPT.src  || { echo "Could not source EXPT.src"; exit 1; }
+
+
+ik=1
+if [ $ik -eq 0 ] ; then
+   INITFLG="--init"
+else
+   INITFLG=""
+fi
+START="YDATE1T00:00:00"
+END="YDATE2T00:00:00"
+cp -f ice_in.1 ice_in
+echo "Start time in pbsjob.sh: $START"
+echo "End   time in pbsjob.sh: $END"
+
+# Generate atmospheric forcing :
+#atmo_synoptic.sh erai+all $START $END 
+atmo_synoptic.sh era5+lw $START $END 
+
+# Transfer data files to scratch - must be in "expt_XXX" dir for this script
+expt_preprocess.sh $START $END $INITFLG        ||  { echo "Preprocess had fatal errors "; exit 1; }
+
+
+# prepare for ensemble run ...
+echo date " prepare for ensemble run ... "
+Idir=$(pwd)
+
+echo "Idir=${Idir} $SLURM_SUBMIT_DIR"
+
+iPert=0
+Pervars="airtmp mslprs precip wndewd wndnwd nswrad radflx shwflx"
+
+if [ ! -s ./force_perturb-2.2 ]; then
+   ln -sf BINDIR/force_perturb-2.2 .
+fi
+
+if [ "$1" -gt "-1" -a "$2" -gt "-1" ]; then
+  mem1=$1
+  mem2=$2
+  (( Nens=mem2-mem1+1 ))
+  echo 'mems: ' $1 '~' $2 ': ' ${Nens}
+else
+  exit $? 
+fi
+
+echo "Cloning the ensemble subdirectory with perturbed forcing'"
+for imem in `seq $mem1 $mem2`; do
+   cd ${Idir}       ||  { echo "Could not go to dir $SLURM_SUBMIT_DIR  "; exit 1; }
+   # setup the model information files
+   Exdir=mem`echo 00${imem} | tail -4c`
+   [ ! -r ${Exdir} ] && mkdir ${Exdir}
+   [ -r ${Exdir}/hycom.stop ] && rm -rf ${Exdir}/hycom.stop
+   [ -r ${Exdir}/SCRATCH ] && rm -rf ${Exdir}/SCRATCH
+   [ ! -r ${Exdir}/SCRATCH ] && mkdir ${Exdir}/SCRATCH
+
+   # link the neccesary model file
+   cd ${Exdir}/SCRATCH
+   [ ! -r ./cice ] && mkdir cice 
+   ln -sf ${S}/* .
+   ln -sf ${S}/cice/* ./cice/.
+
+   [ -r summary_out ] && rm summary_out
+   [ -r ./cice/ice.restart_file ] && rm ./cice/ice.restart_file
+   rm restart.*.?
+   for f in ${S}/restart.*_${Exdir}.? ; do
+     Nf=${#f}
+     ((Nf0 = Nf - 33 ))
+#     echo $f $Nf ${f:Nf0:24}${f:Nf-2:2} 
+     ln -sf $f ${f:Nf0:24}${f:Nf-2:2} 
+   done
+   rm ./cice/iced.*.nc
+   for f in ${S}/cice/iced.*_${Exdir}.nc ; do
+      Nf=${#f}
+      ((Nf0 = Nf -31 ))
+    #  echo $f $Nf $Nf0 ${f:Nf0:21}.nc
+      ln -sf $f ./cice/${f:Nf0:21}.nc
+      echo "./cice/${f:Nf0:21}.nc" > ./cice/ice.restart_file
+   done
+
+  # create the perturbeted forcing
+  if [ ! -s ./force_perturb-2.2 ]; then
+     ln -sf ${Idir}/force_perturb-2.2 .
+  fi
+  cp FileDir/infile2.in_init infile2.in
+  if [ ${iPert} -eq 1 ]; then
+     ./force_perturb-2.2 era-i era40
+     echo " imem=${imem}"
+     echo "replace ${Pervars} ... "
+     for ifile in ${Pervars}; do
+       if [ -r tst.forcing.${ifile}.a -a -r tst.forcing.${ifile}.b ]; then
+         rm forcing.${ifile}.[ab]
+         ln -sf tst.forcing.${ifile}.a forcing.${ifile}.a
+         ln -sf tst.forcing.${ifile}.b forcing.${ifile}.b
+       fi
+     done
+   fi
+done
+   
+exit $?
+

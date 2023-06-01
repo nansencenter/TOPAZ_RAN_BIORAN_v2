@@ -1,0 +1,91 @@
+#!/bin/bash -l
+#
+# Project:
+#SBATCH --account=nn9481k --qos=devel
+#
+# Job name:
+#SBATCH -J "en_pre"
+#
+#SBATCH -N 1 
+#SBATCH --exclusive
+#
+# Wall clock limit:
+#SBATCH -t 00:30:00
+#
+#SBATCH -o en_pre.out
+#SBATCH -e en_pre.err
+
+# set up job environment
+set -e # exit on error
+set -u # exit on unset variables
+#set -x
+
+BINDIR=EXVAR0
+ANALYSISDIR=EXVAR1
+ENSSIZE=EXVAR2
+
+RESULTSDIR=EXVAR_1
+JULDAY=EXVAR_2
+
+cd "${ANALYSISDIR}"
+
+# Step 0: full converting lines:
+istep=0
+if [ ${istep} -eq 0 ]; then
+   Nbin=35
+   (( NN = ($ENSSIZE - 1 ) / $Nbin + 1 ))
+   for icycl in `seq 1 ${NN}`; do
+      for ipre in `seq 1 ${Nbin}`; do
+         (( imem = $ipre + ( $icycl - 1 ) * $Nbin ))
+         if [ $imem -le ${ENSSIZE} ]; then
+            mem=`printf "%03d\n" $imem`
+            ${BINDIR}/restart2nc forecast${mem}.a  &
+         fi
+      done
+      wait
+      sleep 1 
+   done
+   istep=1
+fi
+
+# Step 1: checking all the missing files and reprocessing :
+if [ ${istep} -eq 1 ]; then
+   while [ $istep -gt 0 ]; do
+      ${BINDIR}/Checkmem.sh ${ENSSIZE}
+      Ftemp=Checkmem_forecast_0.log
+      if [ -s ${Ftemp} ]; then
+         tmpsize=$(stat -c%s ${Ftemp})
+         if [ "$tmpsize" -gt 1 ]; then
+            Fnams=$(cat ${Ftemp})
+            for inam in ${Fnams} ; do
+               ${BINDIR}/restart2nc forecast${inam}.a  &
+            done
+            wait
+            sleep 1 
+            ${BINDIR}/Checkmem.sh ${ENSSIZE}
+            [ ! -s ${Ftemp} ] && istep=-1
+         else
+            istep=-1
+         fi   
+      else
+         istep=-1
+      fi
+   done
+   echo "istep=" $istep
+   echo " calcuating the state means of ocean and ice (load nco module on Betzy)"
+   # select the right module on Betzy
+   module load NCO/4.9.7-iomkl-2020a
+   # calcuating the state means of ocean and ice
+   if [ ${istep} -eq -1 ]; then
+      for ifile in forecast ice_forecast ; do
+         ncea ${ifile}???.nc ${ifile}.nc
+         cp ${ifile}001.nc ${ifile}.nc ${RESULTSDIR}/${JULDAY}/FORECAST
+      done
+   else
+      echo "Cannot obtaine the mean of the forecast states"
+      echo "exit(sr_preprocess)"
+      exit 1
+   fi
+
+fi
+echo "preprocess finished !"

@@ -1,0 +1,226 @@
+#!/bin/bash -l
+
+##SBATCH --account=nn9481k --qos=devel
+#SBATCH --account=nn9481k 
+#
+#SBATCH -J  TP5_ave
+#SBATCH -N 4
+#SBATCH --exclusive 
+
+### System message output file
+#SBATCH -o log/hycompost.JNAME.out
+#
+### System error message file
+#SBATCH -e log/hycompost.JNAME.err
+#
+### How long job takes, wallclock time hh:mm:ss
+#SBATCH -t 00:30:00
+#
+### Usage  ------------
+### Firstly: Calculate the daily averages according to the defined elements in the ensemble directory
+###          rename the avarege files and moving under the main data directory
+###          The outputs of from both the hycom and the cice 
+###
+### Secondly: rename the resart and iced files according to the member in the ensemble
+### 
+### Thirdly:  cleaning the member directory and keep the log files for each element running
+### 
+###   For example:
+###                    sbatch sr_ensemble_*.sh 1 100
+###-------------------------------------------------------------------------
+#
+## Initialize environment (sets Scratch dir ($S), Data dir $D ++ )
+
+#set -o errexist
+#set -x
+set -e
+set -u
+
+source ../REGION.src  || { echo "Could not source ../REGION.src "; exit 1; }
+source ./EXPT.src  || { echo "Could not source EXPT.src"; exit 1; }
+
+
+if [ "$1" -gt "-1" -a "$2" -gt "-1" ]; then
+  mem1=$1
+  mem2=$2
+  (( Nens=mem2-mem1+1 ))
+  echo 'mems: ' $1 '~' $2 ': ' ${Nens}
+else
+  echo "requires input about mem1 and mem2"
+  exit $? 
+fi
+
+# IdxDir
+#IdxDir=~/NERSC-HYCOM-CICE/hycom/hycom_ALL/hycom_2.2.72_ALL/meanstd/src
+IdxDir=PROPDIR
+
+# Enter directory from where the job was submitted
+cd $SLURM_SUBMIT_DIR       ||  { echo "Could not go to dir $SLURM_O_WORKDIR  "; exit 1; }
+echo $SLURM_SUBMIT_DIR 
+
+idaily=1       # calcuate the daily mean from the ensemble
+irestart=1     # rename the restart and iced files in the ensemble
+iclean=1      # rename the restart and iced files in the ensemble switch on/off for debuging
+
+## Step 1: 
+# initial daily 
+cmem0=mem`echo 00${mem1}|tail -4c`
+cd ${S}
+Flist0=listdaily.hycom
+Flist1=listdaily.cice
+find ../${cmem0}/data/ -maxdepth 1 -name 'archm.*.a' > ${Flist0}
+find ../${cmem0}/data/cice/ -maxdepth 1 -name 'iceh.*-*-*.nc' > ${Flist1}
+if [ -s ${Flist1} ]; then
+   Nl1=$(sed -n '$=' ${Flist1})
+   for ii in `seq 1 ${Nl1}`; do
+      Fline0=$(sed -n "${ii}p" ${Flist1})
+      Fpre1=${Fline0#*iceh.}
+      Fpre2=${Fpre1%.nc}
+      for imem in `seq ${mem1} ${mem2}`; do
+         cmem1=`echo 00${imem}|tail -4c`
+         cmem2=mem${cmem1}
+         Fline1=../${cmem2}/data/cice/iceh.${Fpre2}.nc
+         if [ -s ${Fline1} ]; then
+            ${IdxDir}/BIN/extract_icehmem.sh ${Fline1} ${imem} &
+         fi
+      done
+      wait
+      ml load NCO/4.9.7-iomkl-2020a
+      ncrcat ICEDRIFT.${Fpre2}_mem*.nc ../data/cice/ICEDRIFT.${Fpre2}.nc
+      #mv ICEDRIFT.${Fpre2}_mem???.nc ../data/cice/.
+      source /cluster/home/xiejp/Betzymodule
+   done
+fi
+
+if [ -r ${Flist0} -a -r ${Flist1} -a ${idaily} -eq 1 ]; then
+   echo "Ensemble mean for hycom result ..."
+   Nl1=$(sed -n '$=' ${Flist0})
+   for ii in `seq 1 ${Nl1}`; do
+      Fline0=$(sed -n "${ii}p" ${Flist0})
+      ${IdxDir}/BIN/ensemble_mean.sh listdaily.hycom listdaily.cice ${ii} ${mem1} ${mem2} &
+   done
+   wait
+   mv meancice_*.in ../log/.
+   mv meanhycom_*.in ../log/.
+   rm ${Flist0} ${Flist1}
+fi
+
+## Step 2: 
+# rename the foreward initial conditions
+cmem0=mem`echo 00${mem1}|tail -4c`
+cd ${S}
+Flist0=list.restart
+Flist1=list.iced
+find ../${cmem0}/data/ -maxdepth 1 -name 'restart.*.a' > ${Flist0}
+find ../${cmem0}/data/cice/ -maxdepth 1 -name 'iced.*-*-00000.nc' > ${Flist1}
+
+if [ -r ${Flist0} -a -r ${Flist1} -a ${irestart} -eq 1 ]; then
+   echo "Prepare the initial condition for each member ..."
+   # 2.1 hycom restart 
+   Nl1=$(sed -n '$=' ${Flist0})
+   for ii in `seq 1 ${Nl1}`; do
+      Fline0=$(sed -n "${ii}p" ${Flist0})
+      hycombase=restart.$(echo ${Fline0} | sed "s/.*restart.//" | sed "s/\.[ab]//")
+      surF=${Fline0/mem*/}
+      for imm in `seq ${mem1} ${mem2}`; do
+         cmem1=mem`echo 00${imm}|tail -4c`
+         Finia=${surF}${cmem1}/data/restart${Fline0/*restart/}
+         #Finia=${Fline0/${cmem0}/${cmem1}}
+         NN=${#Finia}
+         Finib=${Finia:0:NN-1}b
+         if [ -r ${Finia} -a -r ${Finib} ]; then
+            echo "moving ${Finia} to" ../data/${hycombase}_${cmem1}.a
+            mv ${Finia} ../data/${hycombase}_${cmem1}.a
+            echo "moving ${Finib} to" ../data/${hycombase}_${cmem1}.b
+            mv ${Finib} ../data/${hycombase}_${cmem1}.b
+         fi
+      done
+   done
+
+   # 1.2 cice at 0 Oclock 
+   Nl2=$(sed -n '$=' ${Flist1})
+   for ii in `seq 1 ${Nl2}`; do
+      Fline0=$(sed -n "${ii}p" ${Flist1})
+      icebase=iced.$(echo ${Fline0} | sed "s/.*iced.//" | sed "s/.nc//")
+      echo ${icebase}
+      for imm in `seq ${mem1} ${mem2}`; do
+         cmem1=mem`echo 00${imm}|tail -4c`
+         Fmemnc=${Fline0/${cmem0}/${cmem1}}
+         if [ -r ${Fmemnc} ]; then
+            echo "moving ${Fmemnc} to" ../data/cice/${icebase}_${cmem1}.nc
+            mv ${Fmemnc} ../data/cice/${icebase}_${cmem1}.nc
+         fi
+      done
+   done
+   [ -s ../data/cice/ice.restart_file ] && rm ../data/cice/ice.restart_file
+   echo "./cice/"${icebase}".nc" > ../data/cice/ice.restart_file 
+   rm ${Flist0} ${Flist1}
+fi
+
+## Step 3: 
+# clean the present directory 
+if [ ${iclean} -eq 1 ]; then
+   echo "clean all the memeber results"
+   cd ${P} 
+   if [ -r ./keep0 ]; then
+      mv mem??? ./keep0/.
+   else
+      for imm in `seq ${mem1} ${mem2}`; do
+         cmem1=mem`echo 00${imm}|tail -4c`
+         [ -r ./${cmem1} ] && rm -rf ${cmem1}
+      done
+   fi
+   # clean the restart file under $S
+   Flist=list.clean
+   for irec in `seq 1 2`; do
+      [ -s ${Flist} ] && rm ${Flist}
+      if [ ${irec} -eq 1 ]; then
+         find ${S} -maxdepth 1 -name 'restart.*.?' > ${Flist}
+      elif [ ${irec} -eq 2 ]; then
+         find ${S}/cice -maxdepth 1 -name 'iced.*.nc' > ${Flist}
+      fi
+      Nl1=$(sed -n '$=' ${Flist})
+      if [ ! -z "$Nl1" ]; then
+         if [ $Nl1 -gt 0 ]; then
+            for ii in `seq 1 ${Nl1}`; do
+               Fline0=$(sed -n "${ii}p" ${Flist})
+               Fini=$(readlink -f ${Fline0})
+               [ -s ${Fini} ] && rm ${Fini}
+               rm ${Fline0}
+            done
+         fi
+      fi
+   done
+   #[ -s ${Flist} ] && rm ${Flist}
+   #find ${S} -maxdepth 1 -name 'restart.*.?' > ${Flist}
+   #Nl1=$(sed -n '$=' ${Flist})
+   #if [ ! -z "$Nl1" ]; then
+   #   if [ $Nl1 -gt 0 ]; then
+   #      for ii in `seq 1 ${Nl1}`; do
+   #         Fline0=$(sed -n "${ii}p" ${Flist})
+   #         Fini=$(readlink -f ${Fline0})
+   #         rm ${Fini}
+   #      done
+   #   fi
+   #fi
+   #Flist=list.clean
+   #[ -s ${Flist} ] && rm ${Flist}
+   #find ${S}/cice -maxdepth 1 -name 'iced.*.nc' > ${Flist}
+   #Nl1=$(sed -n '$=' ${Flist})
+   #if [ ! -z "$Nl1" ]; then
+   #   if [ $Nl1 -gt 0 ]; then
+   #      for ii in `seq 1 ${Nl1}`; do
+   #         Fline0=$(sed -n "${ii}p" ${Flist})
+   #         Fini=$(readlink -f ${Fline0})
+   #         rm ${Fini}
+   #      done
+   #   fi
+   #fi
+   #rm ${Flist} 
+
+elif [ ${iclean} -eq 0 ]; then
+   exit
+   
+fi
+
+exit $?

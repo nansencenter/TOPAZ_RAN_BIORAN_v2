@@ -1,0 +1,38 @@
+#!/bin/bash -l
+#
+# Project:
+#SBATCH --account=nn2993k --qos=devel
+#
+#  Job name:
+#SBATCH -J "en_fmean"
+#
+#
+# Wall clock limit
+#SBATCH -t 00:30:00
+#
+#SBATCH -o enkf_fmean.out
+#SBATCH -e enkf_fmean.err
+##SBATCH -m jiping.xie@nersc.no
+
+
+# set up job environment
+set -e # exit on error
+set -u # exit on unset variables
+
+#module restore system
+#module load NCO/4.7.2-intel-2018a
+
+
+ANALYSISDIR=EXVAR1
+RESULTSDIR=EXVAR2
+JULDAY=EXVAR3
+
+cd "${ANALYSISDIR}"
+
+#srun -n1 --cpu_bind=cores ncea forecast???.nc forecast.nc
+for ifile in forecast ice_forecast ; do
+  ncea ${ifile}???.nc ${ifile}.nc
+  cp ${ifile}001.nc ${ifile}.nc ${RESULTSDIR}/${JULDAY}/FORECAST
+done
+
+echo "FINISHED"

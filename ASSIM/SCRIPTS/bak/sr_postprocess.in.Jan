@@ -1,0 +1,73 @@
+#!/bin/bash -l
+#
+# Project:
+#SBATCH --account=nn2993k --qos=devel
+#
+# Job name:
+#SBATCH -J "en_post"
+#
+# Wall clock limit:
+#SBATCH -t 00:30:00
+#
+#SBATCH -o en_post.out
+#SBATCH -e en_post.err
+##SBATCH -m jiping.xie@nersc.no
+
+# set up job environment
+set -e # exit on error
+set -u # exit on unset variables
+set -x
+
+BINDIR=EXVAR0
+ANALYSISDIR=EXVAR1
+ENSSIZE=EXVAR2
+NPROC=EXVAR3
+
+cd "${ANALYSISDIR}"
+for (( e = ESTART; e <= EEND; ++e ))
+do
+    mem=`printf "%03d\n" $e`
+
+    # assemble
+    #
+    if [ ! -f "analysis${mem}.a" ]
+    then
+	echo "${BINDIR}/EnKF_assemble.sh forecast${mem}.a forecastICE.uf ${e} ${NPROC}"
+	${BINDIR}/EnKF_assemble.sh forecast${mem}.a forecastICE.uf ${e} ${NPROC}
+	if [ $? -ne 0 ]
+	then
+	    echo "ERROR: EnKF_assemble.sh failed for member ${e}"
+	    exit 1;
+	fi
+	# rm -f analysis${mem}_proc???.?
+    else
+	echo "no need to assemble member ${e}: analysis${mem}.a already exists"
+    fi
+
+    # check for consistency
+    #
+#    echo "${BINDIR}/consistency analysis${mem}.a analysisICE.uf ${e}"
+#    #${BINDIR}/consistency analysis${mem}.a analysisICE.uf ${e}
+#    ${BINDIR}/consistency analysis${mem}.a
+#    if [ $? -ne 0 ]
+#    then
+#	echo "ERROR: consistency failed for member ${e}"
+#	exit 1;
+#    fi
+
+    # fix hycom
+    #
+    echo "${BINDIR}/fixhycom analysis${mem}.a ${e} forecast${mem}.nc ice_forecast${mem}.nc"
+    ${BINDIR}/fixhycom analysis${mem}.a ${e} forecast${mem}.nc ice_forecast${mem}.nc
+
+    if [ $? -ne 0 ]
+    then
+	echo "ERROR: fixhycom failed for member ${e}"
+	exit 1;
+    fi
+    mv tmp${mem}.b fixanalysis${mem}.b
+
+    #${BINDIR}/restart2nc fixanalysis${mem}.a
+    ${BINDIR}/restart2nc_hycom fixanalysis${mem}.a
+done
+echo "FINISHED"

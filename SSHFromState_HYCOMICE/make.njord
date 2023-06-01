@@ -1,0 +1,71 @@
+#Compiler -- F90
+CF90 = /usr/bin/xlf90_r 
+
+#Compiler -- F77
+CF77 = /usr/bin/xlf90_r 
+
+#Compiler -- C
+CC = /usr/local/xlw/xlc
+
+#Linker 
+LD = /usr/bin/xlf90_r 
+
+#Paralellization opts
+PARO =
+#PARO = -qsmp=omp
+PARO_OE = 
+
+#Size defaults
+SIZEO = -b64 -q64 -qrealsize=8
+
+#Arch opts
+ARCHO= -qarch=auto -qtune=auto -qcache=auto
+
+#Optimalization opts
+#OPTO= -O2 -qstrict
+OPTO= -O3 -qstrict
+# Leave it be.. Something goes wrong in optimizing, 
+# and as long as debugging doesnt quite work on
+# tre, I will stick with this...
+#OPTO= 
+
+#Inlining opts
+#INLO= -Q -qipa
+INLO=
+
+# Diverse options
+DIVO= -qmaxmem=-1 -qnosave
+
+
+
+
+# Flags for debugging -- Note linker halt occurs when using qextchk flag and 
+# passing types as arrays ...
+#DEBUG_FLAGS = -C -qflttrap=underflow:overflow:zerodivide:invalid:enable \
+#	          -qextchk -qinitauto=FF -g
+#DEBUG_FLAGS = -C -qflttrap=underflow:overflow:zerodivide:invalid:enable \
+#-qextchk -qinitauto=FF -qfullpath -g -qsigtrap
+DEBUG_FLAGS=-g -qsigtrap
+
+#F77FLG = -qextname -qfixed                   
+#F90FLG = -qextname -qsuffix=f=f90 -qfree=f90 
+F77FLG = -qfixed                   
+F90FLG = -qsuffix=f=f90 -qfree=f90 
+
+
+CFLAGS    = -q64 
+FFLAGS    = $(SIZEO) $(OPTO) $(ARCHO) $(PARO)    $(INLO) $(DIVO) 
+FFLAGS    = $(SIZEO) $(ARCHO) $(PARO)    $(INLO) $(DIVO) $(DEBUG_FLAGS) -I/usr/local/netcdf/netcdf-3.6.1/include/
+FFLAGSD   = $(SIZEO) $(ARCHO) $(PARO)    $(INLO) $(DIVO) $(DEBUG_FLAGS) 
+
+LINKFLAGS= $(SIZEO) $(OPTO) $(PARO) $(INLO) $(DIVO) 
+
+
+CPPARCH = -DIBM -DAIX 
+CPPFLAGS =  -P $(CPPARCH) $(CPPMODEL)
+LIBS = -lessl -L/usr/local/netcdf/netcdf-3.6.1/lib -lnetcdf -lm 
+
+
+CPP = /usr/lib/cpp
+
+

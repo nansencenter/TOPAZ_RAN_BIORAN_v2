@@ -1,0 +1,25 @@
+&method
+	methodtag = "DEnKF"
+/
+&ensemble
+	enssize = 100
+/
+&localisation
+	locfuntag = "Gaspari-Cohn"
+	locrad = 200.0
+/
+&moderation
+	infl = 1.01
+	rfactor1 = 1
+	rfactor2 = 2.0
+	kfactor = 2.0
+/
+&files
+	jmapfname = "jmap.txt"
+	pointfname = "point2nc.txt"
+	meansshfname = "meanssh.uf"
+/
+&prmest
+	prmestname = "", ""
+	prminfl = 1.0, 1.0
+/

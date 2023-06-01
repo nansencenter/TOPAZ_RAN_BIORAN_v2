@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e # exit on error
+set -u # exit on unset variables
+set -x
+
+ANALYSISDIR=EXVAR1
+RESULTSDIR=EXVAR2
+JULDAY=EXVAR3
+
+
+cd ${ANALYSISDIR}
+cp enkf_*.nc observations-*.nc ${RESULTSDIR}/${JULDAY}/ANALYSIS
+
+Lfiles="icevolume.txt SAL.nc TEM.nc"
+
+for ifile in ${Lfiles} ; do
+  if [ -f "./${ifile}" ]; then
+    cp ${ifile} ${RESULTSDIR}/${JULDAY}/ANALYSIS
+  fi
+done

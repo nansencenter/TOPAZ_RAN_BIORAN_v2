@@ -1,0 +1,5 @@
+idrft               ! Ice drift -- CERSAT 
+irr                 ! reg | irr (regular grid or irregular data points?)
+netcdf              ! Data file format (lat lon data)
+999.9  1.00 306.0   ! undef, scale, error variance (testing medium values)
+172800               ! irregular 2*nx*ny for two vector components

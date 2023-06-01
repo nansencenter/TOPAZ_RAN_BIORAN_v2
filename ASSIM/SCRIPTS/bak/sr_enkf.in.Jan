@@ -1,0 +1,31 @@
+#!/bin/bash
+#
+# Project:
+#SBATCH --account=nn2993k --qos=devel
+#
+# Job name:
+#SBATCH -J "Nenkf"
+#
+#SBATCH -N 4
+# design the input parameters for Nproc=16 
+##SBATCH --nodes=1 --ntasks-per-node=8 --cpus-per-task=1
+#
+##SBATCH --mem-per-cpu=4GB
+#
+#
+# Wall clock limit
+#SBATCH -t 00:30:00
+#
+#SBATCH -o enkf.out
+#SBATCH -e enkf.err
+##SBATCH -m jiping.xie@nersc.no
+
+# set up job environment
+set -e # exit on error
+set -u # exit on unset variables
+
+
+ANALYSISDIR=EXVAR1
+NPROC=EXVAR2
+
+cd ${ANALYSISDIR}

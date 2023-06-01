@@ -1,0 +1,64 @@
+KHOME=/home/fimm/nersc/knutali
+
+
+#Compiler -- F90
+CF90 = ifort
+
+#Compiler -- F77
+CF77 = $(CF90)
+
+#Compiler -- C
+CC = gcc
+
+#Linker 
+LD = $(CF90)
+
+#Paralellization opts
+PARO =
+
+#Size defaults
+SIZEO = -real_size 32
+
+#Arch opts
+ARCHO= 
+
+#Optimalization opts
+OPTO= -O2
+
+#Inlining opts
+INLO=
+
+# Diverse options
+DIVO= -convert big_endian 
+
+
+
+
+# Flags for debugging -- Note linker halt occurs when using qextchk flag and 
+# passing types as arrays ...
+#DEBUG_FLAGS=-g -traceback
+#DEBUG_FLAGS=
+
+F77FLG = -nofree                   
+F90FLG = -free
+
+
+CFLAGS    = 
+FFLAGS    = $(SIZEO) $(OPTO) $(ARCHO) $(PARO)    $(INLO) $(DIVO) 
+FFLAGS    = $(SIZEO) $(OPTO) $(ARCHO) $(PARO)    $(INLO) $(DIVO) $(DEBUG_FLAGS) 
+ 
+FFLAGSD   = $(SIZEO) $(ARCHO) $(PARO)    $(INLO) $(DIVO) $(DEBUG_FLAGS) 
+
+LINKFLAGS= $(SIZEO) $(OPTO) $(PARO) $(INLO) $(DIVO)  
+
+
+CPPARCH =  -DIA32 -DREAL4
+CPPFLAGS =  -P $(CPPARCH) $(CPPMODEL) -traditional
+#LIBS=-L/local/Matlab-R14sp3/bin/glnxa64/ -lmat -lmx -lut -licudata -licuuc -licui18n -licuio -lMTwister
+LIBS=-L/local/netcdf/lib -L/local/Matlab-2007a/bin/glnxa64/  -lmx -leng -lut -lmat -licudata -licui18n \
+     -licuuc -licuio  -lz -lhdf5
+
+
+CPP = /usr/bin/cpp
+
+

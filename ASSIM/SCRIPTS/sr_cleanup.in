@@ -1,0 +1,156 @@
+#!/bin/bash -l
+#
+# Project:
+#SBATCH --account=nn9481k --qos=devel
+#
+#  Job name:
+#SBATCH -J "en_cln"
+#
+#SBATCH -N 1 
+#SBATCH --exclusive
+#
+# Wall clock limit
+#SBATCH -t 00:30:00
+#
+#SBATCH -o enkf_clean.out
+#SBATCH -e enkf_clean.err
+
+# set up job environment
+set -e # exit on error
+set -u # exit on unset variables
+
+
+#module load coreutils-cnl
+
+ANALYSISDIR=EXDIR1
+RESULTSDIR=EXDIR2
+MODELDIR=EXDIR3
+FORECASTDIR=EXDIR4
+BACKUPBUFDIR=EXDIR5
+OUTPUTDIR=EXDIR6
+
+HYCOMPREFIX=MODNAM
+ENSSIZE=EXVAR1
+JULDAY=EXVAR2
+
+
+cd ${ANALYSISDIR} # we want the logs there
+
+# move the forecast ensemble to the backup buffer
+# replace the forecast enamble with the analysed ensemble
+#
+if [ -f "./observations.uf" ]
+then
+   cp enkf_*.nc observations-*.nc ${RESULTSDIR}/${JULDAY}/ANALYSIS
+   Lfiles="icevolume.txt SAL.nc TEM.nc"
+
+   for ifile in ${Lfiles} ; do
+      if [ -f "./${ifile}" ]; then
+         cp ${ifile} ${RESULTSDIR}/${JULDAY}/ANALYSIS
+      fi
+   done
+
+   echo "Copying the analysed ensemble to the model directory..."
+   for (( e = 1; e <= ${ENSSIZE}; ++e ))
+   do
+       mem=`printf "%03d\n" ${e}`
+
+       # first step: in HYCOM
+       target=`readlink -e ${ANALYSISDIR}/forecast${mem}.a`
+       # move .a forecast file from model directory to backup
+       mv ${target} -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+       if [ -s fixanalysis${mem}.a ]; then
+          # move .a analysis file to model directory
+          mv fixanalysis${mem}.a ${target}
+          cp ${target} -t ${BACKUPBUFDIR}/ANALYSIS
+       fi
+       target=`readlink -e ${ANALYSISDIR}/forecast${mem}.b`
+       # move .b forecast file from model directory to backup
+       mv ${target} -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+       if [ -s fixanalysis${mem}.b ]; then
+          # move .b analysis file to model directory
+          mv fixanalysis${mem}.b ${target}
+          cp ${target} ${BACKUPBUFDIR}/ANALYSIS
+       fi
+
+
+       # second step: in CICE
+       target=`readlink -e ${ANALYSISDIR}/ice_forecast${mem}.nc`
+       mv ${target} -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+       if [ -s fix_ice_forecast${mem}.nc ]; then
+          mv fix_ice_forecast${mem}.nc ${target}
+          cp ${target} -t ${BACKUPBUFDIR}/ANALYSIS
+       fi
+
+    done
+    
+    # LOG file bakeup
+    if stat -t ${ANALYSISDIR}/*.err > /dev/null 2>&1
+    then
+       cp -rf ${ANALYSISDIR}/*.err ${ANALYSISDIR}/*.out -t ${RESULTSDIR}/${JULDAY}/LOG
+    fi
+
+    if stat -t ${MODELDIR}/*.err > /dev/null 2>&1
+    then
+       cp -rf ${MODELDIR}/log/* -t ${RESULTSDIR}/${JULDAY}/LOG
+    fi
+
+    if stat -t ./*.log.* > /dev/null 2>&1
+    then
+       cp -rf ./*.log.* -t ${RESULTSDIR}/${JULDAY}/LOG
+    fi
+    
+else
+    echo "Linking the forecast ensemble to the output directory..."
+    [ ! -d "${BACKUPBUFDIR}/${JULDAY}/FORECAST" ] && mkdir -p ${BACKUPBUFDIR}/${JULDAY}
+    for (( e = 1; e <= ${ENSSIZE}; ++e ))
+    do
+        mem=`printf "%03d\n" ${e}`
+    
+	target=`readlink -e ${ANALYSISDIR}/forecast${mem}.a`
+        # move .a forecast file from model directory to backup
+	ln -f ${target} -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+
+	target=`readlink -e ${ANALYSISDIR}/forecast${mem}.b`
+        # move .b forecast file from model directory to backup
+	ln -f ${target} -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+
+        # second step: in CICE
+        target=`readlink -e ${ANALYSISDIR}/ice_forecast${mem}.nc`
+	ln -f ${target} -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+    done
+
+fi
+
+## reproduce the daily files
+#if stat -t model_TSSH_??.uf > /dev/null 2>&1
+#then
+#   target=`readlink -e model_TSSH_??.uf`
+#   for ifile in ${target}; do
+#      ln -f ${ifile} -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST/
+#      ln -f ${ifile} -t ${OUTPUTDIR}/${JULDAY} 
+#   done
+#fi
+
+if stat -t ${FORECASTDIR}/archm.*[.a,.b,_SSH.uf] > /dev/null 2>&1
+then
+    ln -f ${FORECASTDIR}/archm.*[.a,.b,_SSH.uf] -t ${OUTPUTDIR}/${JULDAY}
+    mv ${FORECASTDIR}/archm.*[.a,.b,_SSH.uf] -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+fi
+
+
+# for daily in CICE
+#ln -f ${FORECASTDIR}/cice/iceh/iceh.*.nc -t ${OUTPUTDIR}/${JULDAY}
+if stat -t  ${FORECASTDIR}/cice/iceh.*.nc > /dev/null 2>&1
+then
+    ln  -f ${FORECASTDIR}/cice/iceh.*.nc -t ${OUTPUTDIR}/${JULDAY}
+    mv  ${FORECASTDIR}/cice/iceh.*.nc -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+fi
+#mv ${FORECASTDIR}/cice/iceh/iceh.*.nc -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+#if stat -t  ${FORECASTDIR}/cice/iceh.*.nc > /dev/null 2>&1
+#then
+#    mv  ${FORECASTDIR}/cice/iceh.*.nc -t ${BACKUPBUFDIR}/${JULDAY}/FORECAST
+#fi
+
+
+echo "FINISHED (cleanup)"

@@ -1,0 +1,28 @@
+
+# fistly check the information files under FILES
+# to ensure the links are correct and accesible to match with the model used
+# regional.*
+# meanssh*
+# blkdat.input
+# grid.info
+# depth???x???.uf
+
+
+# techenical issues for prepareing the script to test assimilation run
+#
+# 1) Checking principal directories:
+#    ERROR: no ROOTDIR="/cluster/work/users/xiejp/TP2_REANALYSIS" found
+
+# 2) assimilate.sh: ERROR: FORECASTDIR = "/cluster/work/users/xiejp/TP2_Reanalysis/FORECAST": no such directory
+#    link the data directory to the FORECAST directory
+#  And another manually linking the postprepared observation directory:
+#    ln -sf ${targetdirctirt} OBS
+#
+
+# 3) ERROR: check_files.sh: "depths800x880.uf" not found
+#   ensure the files listed in check_file.sh should be right, matched with the model domain
+#
+
+#  4) modify ./SCRIPTS/assimilate.sh: line 196: ./SCRIPTS/link_inputs.sh
+#   because the restart file should be matched well with the used model system
+#

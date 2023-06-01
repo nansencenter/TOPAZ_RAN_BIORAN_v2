@@ -1,0 +1,79 @@
+#!/bin/bash -l
+#
+# Project:
+#SBATCH --account=nn9481k --qos=devel
+#
+#  Job name:
+#SBATCH -J "en_cln2"
+#
+#
+# Wall clock limit
+#SBATCH -t 02:30:00
+#
+#SBATCH -o enkf_clean2.out
+#SBATCH -e enkf_clean2.err
+##SBATCH -m jiping.xie@nersc.no
+
+
+# This script is supposed to be launched after pbs_cleanup.sh and is supposed
+# to contain some slow copying stuff that can be finished during the,
+# integration, so that there no need to delay the integration until it finishes
+
+set -e # exit on error
+set -u # exit on unset variables
+set -x
+
+#module load coreutils-cnl
+
+ROOTDIR=EXDIR0
+ANALYSISDIR=EXDIR1
+RESULTSDIR=EXDIR2
+MODELDIR=EXDIR3
+OUTPUTDIR=EXDIR4
+BACKUPBUFDIR=EXDIR5
+OBSDIR=EXDIR6
+
+HYCOMPREFIX=MODNAM
+ENSSIZE=EXVAR1
+JULDAY=EXVAR2
+
+date
+
+cd ${ANALYSISDIR} # we want the logs there
+
+find ${RESULTSDIR} -exec touch {} \;
+find ${OUTPUTDIR} -exec touch {} \;
+find ${OBSDIR} -exec touch {} \;
+chmod -R a+r+X ${ROOTDIR}
+
+tar czvf ${BACKUPBUFDIR}/RESULTS/${JULDAY}.tar.gz ${RESULTSDIR}/${JULDAY}
+tar czvf ${BACKUPBUFDIR}/OUTPUT/${JULDAY}.tar.gz ${OUTPUTDIR}/${JULDAY}
+tar czvf ${BACKUPBUFDIR}/${JULDAY}.tar.gz ${BACKUPBUFDIR}/${JULDAY}
+
+#if stat -t ${NESTINGDIR}/*/nest_* > /dev/null 2>&1
+#then
+#    #aprun tar czvf ${BACKUPBUFDIR}/NESTING/${JULDAY}.tar.gz ${NESTINGDIR}/*/nest_*
+#    tar czvf ${BACKUPBUFDIR}/NESTING/${JULDAY}.tar.gz ${NESTINGDIR}/*/nest_*
+#    rm -f ${NESTINGDIR}/*/nest_*
+#fi
+
+#if [[ 1 == 0 ]]
+#then
+#    echo "Copying the forecast ensemble to backup buffer..."
+#    (( ncycle = ( ${JULDAY} - 19239 ) / 7 ))
+#    if (( ${ncycle} % 14 == 0 ))
+#	then
+#	ENSEMBLEDIR=${RESULTSDIR}/ENSEMBLE/${JULDAY}
+#	[ ! -d "${ENSEMBLEDIR}" ] && mkdir -p ${ENSEMBLEDIR}
+#        # lfs setstripe ${ENSEMBLEDIR} 0 -1 -1
+#	lfs setstripe ${ENSEMBLEDIR} -s 32M -c 4
+#	echo "saving the ensemble to ${ENSEMBLEDIR}..."
+#        #aprun cp ${BACKUPBUFDIR}/${JULDAY}/FORECAST/* -t ${ENSEMBLEDIR}
+#	cp ${BACKUPBUFDIR}/${JULDAY}/FORECAST/* -t ${ENSEMBLEDIR}
+#    fi
+#fi
+rm -rf ${BACKUPBUFDIR}/${JULDAY}
+
+date
+
+echo "FINISHED"
