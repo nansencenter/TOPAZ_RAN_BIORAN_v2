@@ -87,8 +87,8 @@ if [ -s ${Flist1} ]; then
       wait
       ml load NCO/4.9.7-iomkl-2020a
       ncrcat ICEDRIFT.${Fpre2}_mem*.nc ../data/cice/ICEDRIFT.${Fpre2}.nc
-      #mv ICEDRIFT.${Fpre2}_mem???.nc ../data/cice/.
-      source /cluster/home/xiejp/Betzymodule
+      rm ICEDRIFT.${Fpre2}_mem???.nc 
+      source ${IdxDir}/BIN/Betzymodule
    done
 fi
 

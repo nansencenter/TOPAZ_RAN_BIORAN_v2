@@ -10,6 +10,9 @@ ln -sf ${Mdir}/re_sla.nc re_sla.nc
 
 if [ ! -s ./prep_obs ]; then
   ln -sf /cluster/home/xiejp/enkf/EnKF-MPI-TOPAZ/Prep_Fram/prep_obs .
+else
+  rm ./prep_obs
+  ln -sf /cluster/home/xiejp/enkf/EnKF-MPI-TOPAZ/Prep_Fram/prep_obs_Rio prep_obs
 fi
 
 Idir=/cluster/home/xiejp/REANALYSIS_TP5/preobs_scripts/Infile/
@@ -25,7 +28,7 @@ fi
 
 Jdy0=25700
 Jdy1=25720
-#Jdy1=26760
+Jdy1=26700
 
 
 # reprocess for the satellites in 2022:

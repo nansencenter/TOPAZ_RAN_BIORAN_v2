@@ -4,14 +4,13 @@ ln -sf ${Mdir}/blkdat.input
 ln -sf ${Mdir}/regional.* .
 ln -sf ${Mdir}/grid.info .
 ln -sf ${Mdir}/depths*.uf .
-ln -sf ${Mdir}/meanssh*x*.uf .
+ln -sf ${Mdir}/meanssh*.uf .
 ln -sf ${Mdir}/re_sla.nc .
 
-#Idir=/cluster/home/xiejp/TP4_Reanalysis/preobs_scripts/
 Idir=/cluster/home/xiejp/REANALYSIS_TP5/preobs_scripts/
 
-Odir0=/cluster/work/users/xiejp/data0/SIT_2022
-Odir=/cluster/work/users/xiejp/TP5_Reanalysis/OBS/HICE
+Odir0=/cluster/work/users/xiejp/DATA/data0/cs2smos_205
+Odir=/cluster/work/users/xiejp/work_2023/Data_TP5/HICE
 if [ ! -s ${Odir} ]; then
   mkdir ${Odir}
 fi
@@ -22,9 +21,8 @@ fi
 
 
 
-Jd1=25202
-Jd1=26260
-Jd2=26410
+Jd1=25600
+Jd2=26700
 
 
 for Jdy in `seq ${Jd1} ${Jd2}`; do
@@ -33,8 +31,7 @@ for Jdy in `seq ${Jd1} ${Jd2}`; do
   Sdate0=`jultodate ${Ndy} 1950 1 1`
   Sdate=`jultodate ${Jdy} 1950 1 1`
 #  Fnc=cs2smos_ice_thickness_${Sdate0:0:8}_${Sdate:0:8}_v1.3.nc
-  #Fnc="W_XX-ESA,SMOS_CS2,NH_25KM_EASE2_${Sdate0:0:8}_${Sdate:0:8}_r_v202_01_l4sit.nc"
-  Fnc="W_XX-ESA,SMOS_CS2,NH_25KM_EASE2_${Sdate0:0:8}_${Sdate:0:8}_r_v204_01_l4sit.nc"   # updated at 6th August 2021
+  Fnc="W_XX-ESA,SMOS_CS2,NH_25KM_EASE2_${Sdate0:0:8}_${Sdate:0:8}_r_v205_01_l4sit.nc"   # updated at 6th August 2021
   echo ${Fnc} ${Jdy}
   if [ -s ${Odir0}/${Fnc} -a ! -s ${Odir}/obs_HICE_${Jdy}.nc ]; then
     sed "s/JULDDATE/${Jdy}/" ${Idir}Infile/infile.data_CYSMOShice > infile.data
