@@ -1,13 +1,15 @@
 #!/bin/bash -l
 #
 # Project:
-#SBATCH --account=nn9481k --qos=devel
+##SBATCH --account=nn9481k --qos=devel
+#SBATCH --account=nn9481k 
 #
 # Job name:
 #SBATCH -J "en_pre"
 #
-#SBATCH -N 1 
+#SBATCH -N 4 
 #SBATCH --exclusive
+#SBATCH --ntasks=100 --cpus-per-task=1
 #
 # Wall clock limit:
 #SBATCH -t 00:30:00
@@ -32,14 +34,14 @@ cd "${ANALYSISDIR}"
 # Step 0: full converting lines:
 istep=0
 if [ ${istep} -eq 0 ]; then
-   Nbin=35
+   Nbin=100
    (( NN = ($ENSSIZE - 1 ) / $Nbin + 1 ))
    for icycl in `seq 1 ${NN}`; do
       for ipre in `seq 1 ${Nbin}`; do
          (( imem = $ipre + ( $icycl - 1 ) * $Nbin ))
          if [ $imem -le ${ENSSIZE} ]; then
             mem=`printf "%03d\n" $imem`
-            ${BINDIR}/restart2nc forecast${mem}.a  &
+            srun -N1 -n1 ${BINDIR}/restart2nc forecast${mem}.a  &
          fi
       done
       wait
@@ -58,7 +60,7 @@ if [ ${istep} -eq 1 ]; then
          if [ "$tmpsize" -gt 1 ]; then
             Fnams=$(cat ${Ftemp})
             for inam in ${Fnams} ; do
-               ${BINDIR}/restart2nc forecast${inam}.a  &
+               srun -N1 -n1 ${BINDIR}/restart2nc forecast${inam}.a  &
             done
             wait
             sleep 1 
@@ -73,12 +75,25 @@ if [ ${istep} -eq 1 ]; then
    done
    echo "istep=" $istep
    echo " calcuating the state means of ocean and ice (load nco module on Betzy)"
+   # replacing the hice/fice by the model snapshots:
+   Ficeens=model_ICEDRIFT_00.nc
+   if [ -s ${Ficeens} ]; then
+      for jj in `seq 1 ${ENSSIZE}`; do
+         python ${BINDIR}/replace_fhice.py ${Ficeens} ${jj} &
+      done
+      wait
+      sleep 1
+   fi
+
    # select the right module on Betzy
    module load NCO/4.9.7-iomkl-2020a
    # calcuating the state means of ocean and ice
    if [ ${istep} -eq -1 ]; then
       for ifile in forecast ice_forecast ; do
-         ncea ${ifile}???.nc ${ifile}.nc
+         srun -N1 -n1 ncea ${ifile}???.nc ${ifile}.nc &
+      done
+      wait
+      for ifile in forecast ice_forecast ; do
          cp ${ifile}001.nc ${ifile}.nc ${RESULTSDIR}/${JULDAY}/FORECAST
       done
    else

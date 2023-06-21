@@ -106,19 +106,17 @@ do
         fi
     fi
 
-    iex=$(echo "${OBSTYPES}" | sed -n "/IDRFT/p" | wc -l)
-
-#    if [ ${iex} -gt 0 ]
-#    #if (( `expr match "${OBSTYPES}" IDRFT` > 0 ))
-#    then
-#        echo 'IDRFT: ' $i
-#	if [ ! -r "${modeldaily_prefix}_${yearnow}_${daynow}"_ICEDRIFT.uf ]
-#        then
-#	    echo "ERROR: could not access ${modeldaily_prefix}_${yearnow}_${daynow}_ICEDRIFT.uf"
-#	    exit 1
-#	fi
-#	ln -sf "${modeldaily_prefix}_${yearnow}_${daynow}"_ICEDRIFT.uf model_ICEDRIFT_0"$i".uf
-#    fi
+    # link the ice snapshot including ice drift
+    Datenow=$(jultodate ${juldaynow} 1950 1 1)
+    Ficesnap=${FORECASTDIR}/cice/ICEDRIFT.${Datenow:0:4}-${Datenow:4:2}-${Datenow:6:2}.nc 
+    echo 'IDRFT: ' $i
+    echo $(pwd)
+    if [ ! -r ${Ficesnap} ]
+        then
+	    echo "ERROR: could not access ${Ficesnap}"
+	    exit 1
+    fi
+    ln -sf ${Ficesnap} model_ICEDRIFT_0"$i".nc
 
 done
 

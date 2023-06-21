@@ -146,9 +146,10 @@ do
         fi
       else
          # searching once time during the assimilation time window
-         AWtime=3
          if [ ${obstype}x = "HICE"x ]; then
             AWtime=6
+         else
+            AWtime=3
          fi
          icheck=0
          lday=1
@@ -157,10 +158,11 @@ do
             Fnam=${OBSDIR}/${obstype}/obs_${obstype}_${tmjdy}
             echo ${Fnam}
             if [ -s ${Fnam}.nc -a -s ${Fnam}.uf -a ${icheck} -eq 0 ]; then
-              cp -sf ${Fnam}.uf ${PREPOBSDIR}/observations.uf.${obstype}
-              ln -sf ${Fnam}.nc ${PREPOBSDIR}/observations-${obstype}.nc
-              touch ${PREPOBSDIR}/${obstype}.OK
-              icheck=1
+               cp -sf ${Fnam}.uf ${PREPOBSDIR}/observations.uf.${obstype}
+               ln -sf ${Fnam}.nc ${PREPOBSDIR}/observations-${obstype}.nc
+               touch ${PREPOBSDIR}/${obstype}.OK
+               icheck=1
+               (( lday = lday + 6 ))
             fi
             let lday=lday+1
          done
