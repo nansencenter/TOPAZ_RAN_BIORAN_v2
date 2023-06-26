@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 ##SBATCH --account=nn9481k --qos=devel
-#SBATCH --account=nn9481k 
+#SBATCH --account=nn2993k 
 #
 #SBATCH -J  TP5_ave
 #SBATCH -N 4
@@ -86,9 +86,10 @@ if [ -s ${Flist1} ]; then
       done
       wait
       ml load NCO/4.9.7-iomkl-2020a
-      ncrcat ICEDRIFT.${Fpre2}_mem*.nc ../data/cice/ICEDRIFT.${Fpre2}.nc
-      #mv ICEDRIFT.${Fpre2}_mem???.nc ../data/cice/.
-      source /cluster/home/xiejp/Betzymodule
+      #ncrcat ICEDRIFT.${Fpre2}_mem*.nc ../data/cice/ICEDRIFT.${Fpre2}.nc
+      ncrcat ICEDRIFT.${Fpre2}_mem*.nc ../data/cice/iceh.${Fpre2}_ens.nc
+      rm ICEDRIFT.${Fpre2}_mem???.nc 
+      source ${IdxDir}/BIN/Betzymodule
    done
 fi
 

@@ -200,13 +200,13 @@
   , f_VGRDs        = .false.
   , f_VGRDb        = .false.
   , f_bounds       = .false.
-  , f_aice         = 'hd' 
-  , f_hi           = 'hd'
-  , f_hs           = 'hd' 
+  , f_aice         = 'd' 
+  , f_hi           = 'd'
+  , f_hs           = 'd' 
   , f_Tsfc         = 'd' 
-  , f_sice         = 'hd' 
-  , f_uvel         = 'hd' 
-  , f_vvel         = 'hd' 
+  , f_sice         = 'd' 
+  , f_uvel         = 'd' 
+  , f_vvel         = 'd' 
   , f_uatm         = 'x' 
   , f_vatm         = 'x' 
   , f_fswdn        = 'x' 
@@ -229,9 +229,9 @@
   , f_alidr        = 'x'
   , f_alvdf        = 'x'
   , f_alidf        = 'x'
-  , f_albice       = 'hd'
-  , f_albsno       = 'hd'
-  , f_albpnd       = 'hd'
+  , f_albice       = 'd'
+  , f_albsno       = 'd'
+  , f_albpnd       = 'd'
   , f_coszen       = 'x'
   , f_flat         = 'x' 
   , f_flat_ai      = 'x' 
@@ -309,8 +309,8 @@
 &icefields_mechred_nml
     f_alvl         = 'm'
   , f_vlvl         = 'm'
-  , f_ardg         = 'h'
-  , f_vrdg         = 'h'
+  , f_ardg         = 'x'
+  , f_vrdg         = 'x'
   , f_dardg1dt     = 'x'
   , f_dardg2dt     = 'x'
   , f_dvirdgdt     = 'x'
@@ -376,8 +376,8 @@
 /
 
 &icefields_drag_nml
-    f_drag         = 'h'
-  , f_Cdn_atm      = 'h'
-  , f_Cdn_ocn      = 'h'
+    f_drag         = 'x'
+  , f_Cdn_atm      = 'x'
+  , f_Cdn_ocn      = 'x'
 /
 

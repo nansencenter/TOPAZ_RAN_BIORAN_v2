@@ -22,7 +22,7 @@ MONITORINTERVAL2=30
 LAUNCHINTERVAL=5 # time interval for launching parallel jobs
 
 nre=0 # number of members repropagated
-Fdd=15
+Fdd=7
 #
 # 1. Read and report specifications for the assimilation
 #
