@@ -424,6 +424,12 @@ then
        answer=`squeue --job ${jobid_clean} 2>/dev/null | tail -1 | awk '{print $5}'`
     done
 
+    if [ -s ${ANALYSISDIR}/EnKFPost.OK ]; then
+       echo  " ${CWD}/../STOP "
+       #[ -s ${CWD}/../Twostep ] && rm ${CWD}/../Twostep
+       echo [ -s ${CWD}/../STOP ] && rm ${CWD}/../STOP
+    fi
+
     echo "   "`date`
     echo -n "   launching some background backup jobs:"
 

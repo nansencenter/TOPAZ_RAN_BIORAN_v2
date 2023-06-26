@@ -108,7 +108,8 @@ do
 
     # link the ice snapshot including ice drift
     Datenow=$(jultodate ${juldaynow} 1950 1 1)
-    Ficesnap=${FORECASTDIR}/cice/ICEDRIFT.${Datenow:0:4}-${Datenow:4:2}-${Datenow:6:2}.nc 
+    #Ficesnap=${FORECASTDIR}/cice/ICEDRIFT.${Datenow:0:4}-${Datenow:4:2}-${Datenow:6:2}.nc 
+    Ficesnap=${FORECASTDIR}/cice/iceh.${Datenow:0:4}-${Datenow:4:2}-${Datenow:6:2}_ens.nc 
     echo 'IDRFT: ' $i
     echo $(pwd)
     if [ ! -r ${Ficesnap} ]
@@ -117,6 +118,7 @@ do
 	    exit 1
     fi
     ln -sf ${Ficesnap} model_ICEDRIFT_0"$i".nc
+    ln -sf ${Ficesnap} . 
 
 done
 
@@ -127,18 +129,22 @@ then
 fi
 # linking the ice drift files simulated by model daily.
 if [ -s "${PREPOBSDIR}/observations.uf.IDRFT" ]; then
-  cd "${FORECASTDIR}"
-  if [ ! -s ./pre_icedrift_osisaf.sh ]; then
-    ln -sf ${BINDIR}/pre_icedrift_osisaf.sh . 
-    ln -sf ${BINDIR}/icedrift_osisaf . 
-  fi
-  ./pre_icedrift_osisaf.sh ${JULDAY}
-  cd "${ANALYSISDIR}"
-  for ii in `seq 1 5`; do
-    if [ -s ${FORECASTDIR}/model_ICEDRIFT_OSISAF${ii}.uf ]; then
-      mv ${FORECASTDIR}/model_ICEDRIFT_OSISAF${ii}.uf .
-    fi
-  done
+   #cd "${FORECASTDIR}"
+   #if [ ! -s ./pre_icedrift_osisaf.sh ]; then
+   # ln -sf ${BINDIR}/pre_icedrift_osisaf.sh . 
+   # ln -sf ${BINDIR}/icedrift_osisaf . 
+   #fi
+   #./pre_icedrift_osisaf.sh ${JULDAY}
+   cd "${ANALYSISDIR}"
+   for ii in `seq 1 5`; do
+       (( juldaynow = $JULDAY - $ii ))
+       Ddate=$(jultodate ${juldaynow} 1950 1 1)
+       Ficesnap=iceh.${Ddate:0:4}-${Ddate:4:2}-${Ddate:6:2}_ens.nc 
+       Ficedrift=iceh.${Ddate:0:4}-${Ddate:4:2}-${Ddate:6:2}_ens.uf 
+       echo ${ii} ${Ficedrift} ${Ddate}
+       ${BINDIR}/pre_icedrift.sh ${Ficesnap} model_ICEDRIFT_OSISAF${ii}.uf 
+   done
+   exit
 fi
 
 

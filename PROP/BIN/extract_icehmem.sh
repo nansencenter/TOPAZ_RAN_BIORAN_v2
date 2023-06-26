@@ -31,12 +31,12 @@ if [ $# -gt 2 ]; then
    Fout=ICEDRIFT.$3_mem`echo 00${Emem}|tail -4c`.nc
 else
 
-  Fout=ICEDRIFT.${Fjuly}_mem`echo 00${Emem}|tail -4c`.nc
+   Fout=ICEDRIFT.${Fjuly}_mem`echo 00${Emem}|tail -4c`.nc
 fi
 Fout0=ICEtemp.${Fjuly}_mem`echo 00${Emem}|tail -4c`.nc
 
 #icevars="hisnap_d,aisnap_d,vvel_d,uvel_d,ice_present_d"
-icevars="hisnap_d,aisnap_d,vvel_d,uvel_d"
+icevars="hisnap_d,aisnap_d,vvel_d,uvel_d,aice_d"
 ncks -v ${icevars} ${ficeh} ${Fout0}
 if [ -s ${Fout0} ]; then
    ncks -C -h -O -x -v time_bounds ${Fout0} ${Fout}

@@ -161,4 +161,12 @@ if [ -s fix_ice_forecast.nc ]; then
    mv fix_ice_forecast.nc ${RESULTSDIR}/${JULDAY}/ANALYSIS/ice_analysis.nc 
 fi
 
+
+
+
+
+
+
+
+
 echo "FINISHED (postprocess)" 

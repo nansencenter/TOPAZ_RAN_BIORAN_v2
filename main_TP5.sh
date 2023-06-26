@@ -24,8 +24,7 @@ set -p # nothing is inherited from the shell
 ./SCRIPTS/check_directories.sh
 
 JULDAYSTART=`cat JULDAY.txt`
-#((JULDAYEND = 25466)) # 1 Sep 2019 
-((JULDAYEND = 26000)) # 1 Aug 2020
+((JULDAYEND = 26000)) # 1 Sep 2019 
 
 echo "  JULDAYSTART = ${JULDAYSTART}"
 echo "  JULDAYEND = ${JULDAYEND}"
@@ -39,6 +38,10 @@ do
 	echo
 	echo "Starting assimilation for day ${day} since 1 Jan 1950"
 	echo
+
+        #[ -s Twostep ] && rm Twostep
+        touch STOP
+        echo 'Initial assimilation: ${day}' > STOP
 
 	cd ASSIM
 	echo "JULDAY=${day}" > assimilation_specs.sh
@@ -63,7 +66,7 @@ do
 	    awk -f SCRIPTS/setparameter.awk -v PRM=rfactor1 -v VAL=${RFACTOR} |\
 	    awk -f SCRIPTS/setparameter.awk -v PRM=enssize -v VAL=${ENSSIZE} \
 	    > enkf.prm
-	./SCRIPTS/assimilate_test.sh
+	./SCRIPTS/assimilate_betzy.sh
 	cd ..
         if [ -f STOP ]
         then
@@ -75,7 +78,7 @@ do
 
     echo "Starting propagation for day ${day} since 1 Jan 1950"
     echo
-  
+
 
     cd PROP
     cp -f ../common_specs.sh propagation_specs.sh
