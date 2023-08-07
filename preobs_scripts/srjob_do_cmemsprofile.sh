@@ -11,16 +11,16 @@
 #SBATCH -o /cluster/work/users/xiejp/TP5prof_%J.out   #Standard output and error log
 #SBATCH -e /cluster/work/users/xiejp/TP5prof_%J.err
 ## How long job takes, wallclock time hh:mm:ss
-#SBATCH -t 48:00:00
+#SBATCH -t 12:00:00
 
 # set up job environment
 set -e # exit on error
 set -u # exit on unset variables
 
-Jdy1=25975
-Jdy2=26300
+Jdy1=26300
+Jdy2=26360
 
-Ncore=6
+Ncore=12
 
 (( Delt = ${Jdy2} - ${Jdy1} ))
 if [ ${Delt} -lt ${Ncore} ]; then
