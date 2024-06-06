@@ -1,3 +1,0 @@
-This repository contains the source code necessary to run the assimilation system including the model runing job and the EnKF assimilation to correcte the model initial conditions.
-It should be supported by other additional routines like the coupled HYCOM-CICE model developed at NERSC and the enkf code.
-
