@@ -11,6 +11,7 @@ datasets:
     NCVAR: ice_conc
     NCSTD: total_standard_uncertainty
     NCFLG: status_flag
+    FLGS: 0  # normal retrieval
     TPVAR: ICEC
 
   - TARGET: OSISAF_ICEC_CONT
@@ -23,6 +24,7 @@ datasets:
     NCVAR: ice_conc
     NCSTD: total_standard_uncertainty
     NCFLG: status_flag
+    FLGS: 0  # normal retrieval
     TPVAR: ICEC
 
   - TARGET: ESACCI_SST
@@ -35,6 +37,7 @@ datasets:
     NCVAR: analysed_sst
     NCSTD: analysed_sst_uncertainty
     NCFLG: mask
+    FLGS: 1 # water
     TPVAR: SST
 
   - TARGET: ESACCI_SST_CONC
@@ -47,6 +50,7 @@ datasets:
     NCVAR: analysed_sst
     NCSTD: analysed_sst_uncertainty
     NCFLG: mask
+    FLGS: 1 # water
     TPVAR: SST
 
   - TARGET: OSTIA_SST
@@ -59,8 +63,7 @@ datasets:
     NCVAR: analysed_sst
     NCSTD: analysis_error
     NCFLG: mask
-    FLGS:
-      - 1 # water
+    FLGS: 1 # water
     TPVAR: SST
 
   - TARGET: ESACCI_SCHL
@@ -73,6 +76,8 @@ datasets:
     NCVAR: CHL
     NCSTD: NA
     NCFLG: NA
+    FLGS: NA
+    AGGREGATE: true
     TPVAR: SCHL
 
   - TARGET: CMEMSGLB_SCHL
@@ -85,5 +90,7 @@ datasets:
     NCVAR: CHL
     NCSTD: CHL_uncertainty
     NCFLG: flags
+    FLGS: 0 # water
+    AGGREGATE: true
     TPVAR: SCHL
 
