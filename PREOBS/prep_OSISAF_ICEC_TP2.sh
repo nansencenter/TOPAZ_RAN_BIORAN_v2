@@ -22,7 +22,7 @@ if [ "$isplot" == "true" ]; then
   echo "#-------------------------"
   echo "# plot_prepobs.py $gdate $CNFG $DVAR"
   echo "#-------------------------"
-  python plot_prepobs.py $gdate $CNFG $DVAR
+  python plot_prepobs.py $gdate $CNFG $DSRC $DVAR
 fi
 
 exit 0

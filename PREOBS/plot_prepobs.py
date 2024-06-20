@@ -10,8 +10,8 @@ import numpy as np
 import os
 import sys
 
-if len(sys.argv) != 4:
-    print("Usage: python script_name.py <date> <cnfg> <dvar>")
+if len(sys.argv) != 5:
+    print("Usage: python script_name.py <date> <cnfg> <dsrc> <dvar>")
     sys.exit(1)
 
 # Access the command line arguments
