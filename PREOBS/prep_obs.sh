@@ -18,7 +18,7 @@ dobs_dir=${ran_dir}/PREOBS/CMEMS/$DSRC   # absolute path to original observation
 cnfg_dir=${ran_dir}/CONFIG/$CNFG         # hycom configuration files (copy from topo folder)
 infl_dir=${ran_dir}/PREOBS/Infile        # template of inile.data
 work_dir=${ran_dir}/PREOBS/TMP           # scratch folder
-pobs_dir=${ran_dir}/DATA/${CNFG}/${DVAR} # pre processed observation files by prepobs
+pobs_dir=${ran_dir}/DATA/${CNFG}/${DSRC}/${DVAR} # pre processed observation files by prepobs
 
 fdobs=${dobs_dir}/${DVAR}_${gdate}.nc  # input data file (e.g. SST_20190101.nc)
 

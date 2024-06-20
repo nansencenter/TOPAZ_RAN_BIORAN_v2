@@ -104,7 +104,7 @@ datasets:
     AGGREGATE: true
     TPVAR: SCHL
 
-  - TARGET: CMEMSGLB_SCHL
+  - TARGET: CMEMS_SCHL
     PRODUCT_ID: OCEANCOLOUR_GLO_BGC_L3_MY_009_103
     DATASET_ID: cmems_obs-oc_glo_bgc-plankton_my_l3-multi-4km_P1D
     PROCESSOR: Copernicus-GlobColour
@@ -117,4 +117,3 @@ datasets:
     FLGS: 0 # water
     AGGREGATE: true
     TPVAR: SCHL
-

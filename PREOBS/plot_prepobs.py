@@ -1,4 +1,6 @@
 from mpl_toolkits.basemap import Basemap, cm
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from matplotlib.patches import FancyBboxPatch
 import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.use('TkAgg')  # Use an interactive backend
@@ -15,22 +17,24 @@ if len(sys.argv) != 4:
 # Access the command line arguments
 date = sys.argv[1]
 cnfg = sys.argv[2]
-dvar = sys.argv[3]
+dsrc = sys.argv[3]
+dvar = sys.argv[4]
 
 # Print the arguments (for verification)
 print(f'date: {date}')
 print(f'cnfg: {cnfg}')
+print(f'dsrc: {dsrc}')
 print(f'dvar: {dvar}')
 
 #------------------------------
 # read obs file dumped by prepobs
 #------------------------------
 
-data_dir = '../DATA/'+cnfg
+data_dir = '../DATA/'+cnfg+'/'+dsrc+'/'+dvar
 file_name = 'obs_'+dvar+'_'+date+'.nc'
 base_name, extension = os.path.splitext(file_name)
 
-file_path = data_dir+'/'+dvar+'/'+file_name
+file_path = data_dir+'/'+file_name
 
 dataset = nc.Dataset(file_path, mode='r') # Open the NetCDF file  
 
@@ -93,9 +97,9 @@ else:
    print('Configuration name not supported, STOP')
    exit()
 
-file_path = directory_path+'/'+'prep'+base_name+'_dat_'+cnfg+'.png'
+file_path = directory_path+'/'+'prep'+base_name+'_dat_'+cnfg+'_'+dsrc+'.png'
 
-title = cnfg+'/'+base_name+' '+unit
+title = cnfg+'/'+dsrc+'/'+base_name+' '+unit
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(22, 6))
 
 m1 = Basemap(projection='npaeqd',resolution='c',boundinglat=50,lon_0=0, ax=ax1)
@@ -109,6 +113,17 @@ lbs_lat=[0, 1, 1, 0]
 m1.drawmeridians(range(-180,180,20),labels=lbs_lon,color='gray');
 m1.drawparallels(range(-90,90,10),labels=lbs_lat,color='gray');
 ax1.set_title(title, pad=20)
+
+data=dat.compressed()
+min_range = int(vmin)
+max_range = int(vmax)
+median_value = np.median(data)
+hist, bin_edges = np.histogram(data, bins=20, range=(min_range, max_range), density=True)
+
+ax1_hist = inset_axes(ax1, width="25%", height="18%", loc='upper right', borderpad=2.0)
+ax1_hist.hist(data, bins=20, range=(min_range, max_range), edgecolor='none', density=True)
+ax1_hist.tick_params(axis='both', which='major', labelsize=7) 
+ax1_hist.text(0.65, 0.8, f'Median: {median_value:.2f}', transform=ax1_hist.transAxes, fontsize=7, ha='center', va='bottom')
 
 m2 = Basemap(projection='cass',resolution='i',llcrnrlon=-20,llcrnrlat=55,urcrnrlon=60,urcrnrlat=75,lon_0=0,lat_0=70,ax=ax2)
 x_plot, y_plot = m2(lon,lat)
@@ -191,9 +206,9 @@ else:
    print('Configuration name not supported, STOP')
    exit()
 
-file_path = directory_path+'/'+'prep'+base_name+'_std_'+cnfg+'.png'
+file_path = directory_path+'/'+'prep'+base_name+'_std_'+cnfg+'_'+dsrc+'.png'
 
-title = cnfg+'/'+base_name+' STD '+unit
+title = cnfg+'/'+dsrc+'/'+base_name+' STD '+unit
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(22, 6))
 
 m1 = Basemap(projection='npaeqd',resolution='c',boundinglat=50,lon_0=0, ax=ax1)
@@ -207,6 +222,17 @@ lbs_lat=[0, 1, 1, 0]
 m1.drawmeridians(range(-180,180,20),labels=lbs_lon,color='gray');
 m1.drawparallels(range(-90,90,10),labels=lbs_lat,color='gray');
 ax1.set_title(title, pad=20)
+
+data=std.compressed()
+min_range = int(vmin)
+max_range = int(vmax)
+median_value = np.median(data)
+hist, bin_edges = np.histogram(data, bins=20, range=(min_range, max_range), density=True)
+
+ax1_hist = inset_axes(ax1, width="25%", height="18%", loc='upper right', borderpad=2.0)
+ax1_hist.hist(data, bins=20, range=(min_range, max_range), edgecolor='none', density=True)
+ax1_hist.tick_params(axis='both', which='major', labelsize=7) 
+ax1_hist.text(0.65, 0.8, f'Median: {median_value:.2f}', transform=ax1_hist.transAxes, fontsize=7, ha='center', va='bottom')
 
 m2 = Basemap(projection='cass',resolution='i',llcrnrlon=-20,llcrnrlat=55,urcrnrlon=60,urcrnrlat=75,lon_0=0,lat_0=70,ax=ax2)
 x_plot, y_plot = m2(lon,lat)
