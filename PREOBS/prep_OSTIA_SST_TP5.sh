@@ -20,7 +20,7 @@ bash prep_obs.sh $gdate $CNFG $DSRC $DVAR
 
 if [ "$isplot" == "true" ]; then
   echo "#-------------------------"
-  echo "# prep_obs.sh"
+  echo "# plot_prepobs.py"
   echo "#-------------------------"
   python plot_prepobs.py $gdate $CNFG $DVAR
 fi

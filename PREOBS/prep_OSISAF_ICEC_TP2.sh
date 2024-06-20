@@ -8,19 +8,19 @@ isplot="true"    # plot/save on map projections
 
 if [ ! -s CMEMS/${DSRC}/${DVAR}_${gdate}.nc ]; then
   echo "#-------------------------"
-  echo "# cmems_loader.py"
+  echo "# cmems_loader.py ${gdate} ${DSRC} full"
   echo "#-------------------------"
   python cmems_loader.py ${gdate} ${DSRC} full
 fi
 
 echo "#-------------------------"
-echo "# prep_obs.sh"
+echo "# prep_obs.sh $gdate $CNFG $DSRC $DVAR"
 echo "#-------------------------"
 bash prep_obs.sh $gdate $CNFG $DSRC $DVAR
 
 if [ "$isplot" == "true" ]; then
   echo "#-------------------------"
-  echo "# prep_obs.sh"
+  echo "# plot_prepobs.py $gdate $CNFG $DVAR"
   echo "#-------------------------"
   python plot_prepobs.py $gdate $CNFG $DVAR
 fi

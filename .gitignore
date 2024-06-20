@@ -3,3 +3,7 @@ data
 TMP
 config_user.yaml
 CMEMS
+DATA
+figs
+*.png
+*.eps
