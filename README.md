@@ -2,7 +2,7 @@
 
 New prepobs scripts folder: ```preobs_bgc``` is added for integrating CMEMS data loader and prepobs. Main scripts are:
 ```bash
-cmems_downloader.py  # CMEMS data loader
+cmems_loader.py  # CMEMS data loader
 prep_obs.sh          # for executing prep_obs
 plot_prepobs.py      # for visual check of obs_[SST|ICEC|SCHL]_[YYYYMMDD].nc 
 ```
@@ -16,16 +16,16 @@ prep_ESACCI_SCHL_[TP5|TP2].sh   # ESACCI sea surface chlorophyll preprocessor fo
 ```
 #### notes:
 - Before running ```prep_obs.sh```, make sure that executable ```Prep_Routines/prep_obs``` of the updated EnKF package [link](https://github.com/nansencenter/TOPAZ_ENKF_BIORAN_v2) is compiled and its location is set in ```PATH``` settings in ```prep_obs.sh```.  
-- To use ```cmems_downloader.py```, you need to copy ```config_user_template.yaml``` to ```config_user.yaml``` and edit CMEMS user information.
+- To use ```cmems_loader.py```, you need to copy ```config_user_template.yaml``` to ```config_user.yaml``` and edit CMEMS user information.
 - To add new dataset to CMEMS data loader, register dataset information to ```config_loader.yaml``` following existing cases. 
 - ```ESACCI_SCHL``` is accessing pre-downloaded ESA OC-CCI v6.0 due to lack of uncertainty information in CMEMS product.
 - ```SCHL``` data is aggregated to a target date over 7 days window with ±3 days range centered at the target date as default settings. To change the settings, edit ```cmems_downloader.py```.
 - prepobs preprocessed observation file is saved in ```obs_[SST|ICEC|SCHL]_[YYYYMMDD].nc``` file name format under ```DATA/[TP5|TP2]``` folder instead of in ```obs_[SST|ICEC|SCHL]_[JDate].nc``` format, where ```YYYYMMDD``` is Gregorian date and ```JDate``` is hycom Julian date counted from ```1950 0 0```.
 - ```plot_prepobs.py``` uses ```basemap``` for map projection with Python3. You can add ```basemap``` with ```pip``` on Betsy.  
 
-For the usage of ```cmems_downloader.py```, type:
+For the usage of ```cmems_loader.py```, type:
 ```bash
-python cmems_downloader.py
+python cmems_loader.py
 ```
 
 ### TODO:
