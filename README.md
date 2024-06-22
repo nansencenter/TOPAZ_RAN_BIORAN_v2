@@ -20,6 +20,7 @@ Note:
 - To use ```cmems_downloader.py```, you need to copy ```config_user_template.yaml``` to ```config_user.yaml``` and edit CMEMS user information.
 - To add new dataset to CMEMS data loader, register dataset information to ```config_loader.yaml``` following existing cases. 
 - ```ESACCI_SCHL``` is accessing pre-downloaded ESA OC-CCI v6.0 due to lack of uncertainty information in CMEMS product.
+- ```SCHL``` data is aggregated to target date over 7 days window with ±3 days range centered the target date as default settings.
 - prepobs preprocessed observation file is saved in ```[TP5|TP2]/obs_[SST|ICEC|SCHL]_YYYYMMDD.nc``` file name format under ```DATA``` folder instead of in ```obs_[SST|ICEC|SCHL]_JDate.nc``` format, where ```JDate``` is hycom Jule date counted from ```1950 0 0```.  
 
 For the usage of ```cmems_downloader.py```, type:
