@@ -21,7 +21,8 @@ python cmems_loader.py
 ```
 
 #### notes:
-- Before running ```prep_obs.sh```, make sure that executable ```Prep_Routines/prep_obs``` of the updated EnKF package [link](https://github.com/nansencenter/TOPAZ_ENKF_BIORAN_v2) is compiled and its location is set in ```PATH``` settings in ```prep_obs.sh```.  
+- Before running ```prep_obs.sh```, make sure that executable ```Prep_Routines/prep_obs``` of the updated EnKF package [link](https://github.com/nansencenter/TOPAZ_ENKF_BIORAN_v2) is compiled and its location is set in ```PATH``` settings in ```prep_obs.sh```.
+- hycom configuration files: ```regional.grid.(a,b)```, ```regional.depth.(a,b)```, ```grid.info``` and ```blkdat.input``` are copied from hycom folder to ```CONFIG``` folder.   
 - To use ```cmems_loader.py```, you need to copy ```config_user_template.yaml``` to ```config_user.yaml``` and edit CMEMS user information.
 - To add new dataset to CMEMS data loader, register dataset information to ```config_loader.yaml``` following existing cases. 
 - ```ESACCI_SCHL``` is accessing pre-downloaded ESA OC-CCI v6.0 due to lack of uncertainty information in CMEMS product.
