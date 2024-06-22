@@ -32,3 +32,4 @@ python cmems_downloader.py
 ## TODO:
 
 - integrate BGC data aggregator [prepobs_bgc](https://github.com/nansencenter/prepobs_bgc) for BGC in-situ and BGC Argo data.
+- add CMEMS data loader for CMEMS CORE Argo temperature and salinity profiles.
