@@ -6,7 +6,7 @@ New prepobs scripts folder: ```preobs_bgc``` is added for integrating CMEMS data
 ```bash
 cmems_downloader.py  # CMEMS data loader
 prep_obs.sh          # for executing prepobs
-plot_prepobs.py      # for visual check of ```obs_[SST|ICEC|SCHL]_YYYYMMDD.nc``` 
+plot_prepobs.py      # for visual check of obs_[SST|ICEC|SCHL]_YYYYMMDD.nc 
 ```
 
 For the usage, see the following sample scripts under ```preobs_bgc```:
