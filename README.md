@@ -18,7 +18,7 @@ prep_ESACCI_SCHL_[TP5|TP2].sh   # ESACCI sea surface chlorophyll preprocessor fo
 ```
 Note: 
 - ```ESACCI_SCHL``` is accessing pre-downloaded ESA OC-CCI v6.0 due to lack of uncertainty information in CMEMS product.
-- prepobs preprocessed observation file is saved in ```obs_[SST|ICEC|SCHL]_YYYYMMDD.nc``` instead of ```obs_[SST|ICEC|SCHL]_JDate.nc```, where ```JDate``` is hycom Jule date counted from ```1950 0 0```.  
+- prepobs preprocessed observation file is saved in ```[TP5|TP2]/obs_[SST|ICEC|SCHL]_YYYYMMDD.nc``` file name format under ```DATA``` folder instead of in ```obs_[SST|ICEC|SCHL]_JDate.nc``` format, where ```JDate``` is hycom Jule date counted from ```1950 0 0```.  
 
 For the usage of ```cmems_downloader.py```, type:
 ```bash
