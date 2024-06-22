@@ -6,7 +6,7 @@ New prepobs scripts folder: ```preobs_bgc``` is added for integrating CMEMS data
 ```bash
 cmems_downloader.py  # CMEMS data loader
 prep_obs.sh          # for executing prepobs
-plot_prepobs.py      # for visual check of obs_[SST|ICEC|SCHL]_YYYYMMDD.nc 
+plot_prepobs.py      # for visual check of obs_[SST|ICEC|SCHL]_[YYYYMMDD].nc 
 ```
 
 For the usage, see the following sample scripts under ```preobs_bgc```:
@@ -21,7 +21,7 @@ Note:
 - To add new dataset to CMEMS data loader, register dataset information to ```config_loader.yaml``` following existing cases. 
 - ```ESACCI_SCHL``` is accessing pre-downloaded ESA OC-CCI v6.0 due to lack of uncertainty information in CMEMS product.
 - ```SCHL``` data is aggregated to a target date over 7 days window with ±3 days range centered at the target date as default settings.
-- prepobs preprocessed observation file is saved in ```[TP5|TP2]/obs_[SST|ICEC|SCHL]_YYYYMMDD.nc``` file name format under ```DATA``` folder instead of in ```obs_[SST|ICEC|SCHL]_JDate.nc``` format, where ```JDate``` is hycom Jule date counted from ```1950 0 0```.  
+- prepobs preprocessed observation file is saved in ```obs_[SST|ICEC|SCHL]_[YYYYMMDD].nc``` file name format under ```DATA/[TP5|TP2]``` folder instead of in ```obs_[SST|ICEC|SCHL]_[JDate].nc``` format, where ```YYYYMMDD``` is Gregorian date and ```JDate``` is hycom Julian date counted from ```1950 0 0```.  
 
 For the usage of ```cmems_downloader.py```, type:
 ```bash
