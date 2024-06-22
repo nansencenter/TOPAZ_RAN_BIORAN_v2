@@ -1,5 +1,3 @@
-# TOPAZ RAN with BGC assimilation
-
 ### main update
 
 New prepobs scripts folder: ```preobs_bgc``` is added for integrating CMEMS data loader and prepobs. Main scripts are:
