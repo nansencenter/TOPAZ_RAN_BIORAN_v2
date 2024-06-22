@@ -16,7 +16,7 @@ prep_OSTIA_SST_[TP5|TP2].sh     # OSTIA sea surface temperature preprocessor for
 prep_CMEMS_SCHL_[TP5|TP2].sh    # CMEMS (GlobColour) sea surface preprocessor for [TP5|TP2] grid
 prep_ESACCI_SCHL_[TP5|TP2].sh   # ESACCI sea surface chlorophyll preprocessor for [TP5|TP2] grid
 ```
-Note:
+Notes:
 - To use ```cmems_downloader.py```, you need to copy ```config_user_template.yaml``` to ```config_user.yaml``` and edit CMEMS user information.
 - To add new dataset to CMEMS data loader, register dataset information to ```config_loader.yaml``` following existing cases. 
 - ```ESACCI_SCHL``` is accessing pre-downloaded ESA OC-CCI v6.0 due to lack of uncertainty information in CMEMS product.
