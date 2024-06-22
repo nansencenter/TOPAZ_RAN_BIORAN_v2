@@ -22,7 +22,7 @@ Note:
 - ```ESACCI_SCHL``` is accessing pre-downloaded ESA OC-CCI v6.0 due to lack of uncertainty information in CMEMS product.
 - ```SCHL``` data is aggregated to a target date over 7 days window with ±3 days range centered at the target date as default settings.
 - prepobs preprocessed observation file is saved in ```obs_[SST|ICEC|SCHL]_[YYYYMMDD].nc``` file name format under ```DATA/[TP5|TP2]``` folder instead of in ```obs_[SST|ICEC|SCHL]_[JDate].nc``` format, where ```YYYYMMDD``` is Gregorian date and ```JDate``` is hycom Julian date counted from ```1950 0 0```.
-- ```plot_prepobs.py``` uses ```basemap``` for map projection with Python3. You can add b```asemap``` with ```pip``` on Betsy.  
+- ```plot_prepobs.py``` uses ```basemap``` for map projection with Python3. You can add ```basemap``` with ```pip``` on Betsy.  
 
 For the usage of ```cmems_downloader.py```, type:
 ```bash
