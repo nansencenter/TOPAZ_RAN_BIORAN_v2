@@ -1,6 +1,6 @@
 # TOPAZ RAN with BGC assimilation
 
-## main update
+### main update
 
 New prepobs scripts folder: ```preobs_bgc``` is added for integrating CMEMS data loader and prepobs. Main scripts are:
 ```bash
@@ -29,7 +29,7 @@ For the usage of ```cmems_downloader.py```, type:
 python cmems_downloader.py
 ```
 
-## TODO:
+### TODO:
 
 - integrate BGC data aggregator [prepobs_bgc](https://github.com/nansencenter/prepobs_bgc) for BGC in-situ and BGC Argo data.
 - register CMEMS CORE Argo temperature and salinity profiles files to CMEMS data loader.
