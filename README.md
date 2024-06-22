@@ -14,6 +14,12 @@ prep_OSTIA_SST_[TP5|TP2].sh     # OSTIA sea surface temperature preprocessor for
 prep_CMEMS_SCHL_[TP5|TP2].sh    # CMEMS (GlobColour) sea surface preprocessor for [TP5|TP2] grid
 prep_ESACCI_SCHL_[TP5|TP2].sh   # ESACCI sea surface chlorophyll preprocessor for [TP5|TP2] grid
 ```
+
+For the usage of ```cmems_loader.py```, type:
+```bash
+python cmems_loader.py
+```
+
 #### notes:
 - Before running ```prep_obs.sh```, make sure that executable ```Prep_Routines/prep_obs``` of the updated EnKF package [link](https://github.com/nansencenter/TOPAZ_ENKF_BIORAN_v2) is compiled and its location is set in ```PATH``` settings in ```prep_obs.sh```.  
 - To use ```cmems_loader.py```, you need to copy ```config_user_template.yaml``` to ```config_user.yaml``` and edit CMEMS user information.
@@ -22,11 +28,6 @@ prep_ESACCI_SCHL_[TP5|TP2].sh   # ESACCI sea surface chlorophyll preprocessor fo
 - ```SCHL``` data is aggregated to a target date over 7 days window with ±3 days range centered at the target date as default settings. To change the settings, edit ```cmems_downloader.py```.
 - prepobs preprocessed observation file is saved in ```obs_[SST|ICEC|SCHL]_[YYYYMMDD].nc``` file name format under ```DATA/[TP5|TP2]``` folder instead of in ```obs_[SST|ICEC|SCHL]_[JDate].nc``` format, where ```YYYYMMDD``` is Gregorian date and ```JDate``` is hycom Julian date counted from ```1950 0 0```.
 - ```plot_prepobs.py``` uses ```basemap``` for map projection with Python3. You can add ```basemap``` with ```pip``` on Betsy.  
-
-For the usage of ```cmems_loader.py```, type:
-```bash
-python cmems_loader.py
-```
 
 ### TODO:
 
