@@ -31,7 +31,7 @@ python cmems_loader.py
 - ```subset``` domain is set to [-180E,180E] and [40N,90N] as default settings. To change the settings, edit ```cmems_loader.py```.
 - prepobs-preprocessed observation file is saved in ```obs_[SST|ICEC|SCHL]_[YYYYMMDD].nc``` file name format under ```DATA/[TP5|TP2]/[SST|ICEC|SCHL]``` folder instead of in ```obs_[SST|ICEC|SCHL]_[JDate].nc``` format under ```DATA/[SST|ICEC|SCHL]``` folder, where ```YYYYMMDD``` is Gregorian date and ```JDate``` is hycom Julian date counted from ```1950 0 0```.
 - ```plot_prepobs.py``` uses ```basemap``` for map projection with Python3. You can add ```basemap``` with ```pip``` on Betsy.
-- ```cmems_loader.py``` uses ```cdo``` for netcdf files aggregation. You can add ```cdo``` with ```module load``` on Betsy.  
+- ```cmems_loader.py``` uses ```cdo``` for netcdf files aggregation and averaging. You can add ```cdo``` with ```module load``` on Betsy.  
 
 ### TODO:
 
