@@ -33,3 +33,4 @@ python cmems_loader.py
 
 - integrate BGC data aggregator [prepobs_bgc](https://github.com/nansencenter/prepobs_bgc) for BGC in-situ and BGC Argo data.
 - register CMEMS CORE Argo temperature and salinity profiles files to CMEMS data loader.
+- replace ```subset``` settings hard coded in CMEMS data loader by external yaml file.
