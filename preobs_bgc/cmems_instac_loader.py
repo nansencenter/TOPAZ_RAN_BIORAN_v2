@@ -160,7 +160,7 @@ print(f"List of download files: {file_list}")
 # Download selected files
 #-----------------------------------
 
-output_directory=f"{data_directory}/CMEMS_INSTAC_{dataset_version}/{instrument}/{var}"
+output_directory=f"{data_directory}/CMEMS_INSTAC_{dataset_version}/{instrument}"
 print(f"Files be downloaded to {output_directory}")
 
 if isload:
