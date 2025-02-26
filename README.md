@@ -3,6 +3,7 @@
 New prepobs scripts folder: ```preobs_bgc``` is added for integrating CMEMS data loader and prepobs. Main scripts are:
 ```bash
 cmems_loader.py  # CMEMS data loader
+cmems_instac_loader.py  # CMEMS Global Ocean Delayed Mode Biogeochemical product loader
 prep_obs.sh      # for executing prep_obs
 plot_prepobs.py  # for visual check of obs_[SST|ICEC|SCHL]_[YYYYMMDD].nc 
 ```
@@ -18,6 +19,11 @@ prep_ESACCI_SCHL_[TP5|TP2].sh   # ESACCI sea surface chlorophyll preprocessor fo
 For the usage of ```cmems_loader.py```, type:
 ```bash
 python cmems_loader.py
+```
+
+For the usage of ```cmems_instac_loader.py```, type:
+```bash
+python cmems_instac_loader.py
 ```
 
 #### notes:
@@ -39,3 +45,4 @@ python cmems_loader.py
 - register CMEMS CORE Argo temperature and salinity profiles files to CMEMS data loader.
 - replace ```subset``` settings hard coded in ```cmems_loader.py``` by external yaml file ```config_subset.yaml```.
 - replace ```aggregation``` settings hard coded in ```cmems_loader.py``` by external yaml file ```config_aggregation.yaml```.
+- merge cmems_instac_loader.py to cmems_loader.py
