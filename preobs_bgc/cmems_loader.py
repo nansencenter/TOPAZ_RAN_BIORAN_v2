@@ -1,4 +1,4 @@
-# COEPERCNIUS data laoder for ARC MFC reanalysis system
+# COEPERNICUS data laoder for ARC MFC reanalysis system
 #
 # version 1.0
 #

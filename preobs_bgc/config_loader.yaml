@@ -1,6 +1,6 @@
 # CMEMS product information for COPERNICUS downloader
 #
-# Register dataset for download nc files with cmems_loader.py
+# Register dataset for downloading nc files with cmems_loader.py
 #
 # Note: 1. NCFLGS and FLGS are for future use.
 #       2. ESACCI_SCHL accesses to nc files downloaded directory 
