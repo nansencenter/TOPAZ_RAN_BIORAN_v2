@@ -1,3 +1,7 @@
+## Preparation of input files
+
+## Preparation of observations
+
 ### main update
 
 New prepobs scripts folder: ```preobs_bgc``` is added for integrating CMEMS data loader and prepobs. Main scripts are:
