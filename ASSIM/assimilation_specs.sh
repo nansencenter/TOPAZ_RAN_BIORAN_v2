@@ -1,18 +1,19 @@
-JULDAY=25999
+JULDAY=25943
 #!/bin/bash
 
 # parameters common to both propagation and assimilation
 #
-ROOTDIR="/cluster/work/users/xiejp/TP5_Reanalysis"
+MSCPROGSBIN="/cluster/home/wakamatsut/bioran_v2/topaz_hyc/hycom/MSCPROGS/bin"
+ROOTDIR="/cluster/work/users/wakamatsut/bioran_v2"
 FORECASTDIR="${ROOTDIR}/FORECAST"
-TAPEDIR="/cluster/work/users/xiejp/TP5_Reanalysis"
+TAPEDIR="${ROOTDIR}"
 BACKUPBUFDIR="${ROOTDIR}/TOBACKUP"
 RESULTSDIR="${ROOTDIR}/RESULTS"
 ANALYSISDIR="${ROOTDIR}/ANALYSIS"
-MODELDIR="/cluster/work/users/xiejp/TOPAZ/TP5a0.06/expt_04.1"
+MODELDIR="${ROOTDIR}/TP2a0.10/expt_03.0"
 OUTPUTDIR="${ROOTDIR}/OUTPUT"
 NESTINGDIR="${ROOTDIR}/NESTING"
-HYCOMPREFIX="TP5"
+HYCOMPREFIX="TP2"
 ENSSIZE=100
 # assimilation specific parameters
 #
@@ -45,7 +46,7 @@ Obslink=/cluster/work/users/xiejp/work_2018/Data
 if [ ${OBSREADY} == 1 ]; then
  Tdir=$(pwd)
  cd ${OBSDIR}
- Obslink=/cluster/work/users/xiejp/TP2_Reanalysis/DATA
+ Obslink="${ROOTDIR}/DATA"
  o=0
  for obsty in ${OBSTYPES} ; do
    if [ -r ${obsty} ]; then
@@ -72,4 +73,4 @@ fi
 # GSAL - in-situ salinity in "glider" format
 # GTEM - in-situ temperature in "glider" format
 JULDAYSTART=25936
-CWD=/cluster/home/xiejp/REANALYSIS_TP5_spinup/ReanalysisTP5/ASSIM
+CWD=/cluster/home/wakamatsut/bioran_v2/topaz_ran/ASSIM

@@ -11,7 +11,8 @@ echo "Checking principal directories:"
 echo "  ROOTDIR = ${ROOTDIR}"
 
 #[ ! -d "${BACKUPBUFDIR}" ] && mkdir -p ${BACKUPBUFDIR} && lfs setstripe ${BACKUPBUFDIR} 0 -1 -1
-[ ! -d "${BACKUPBUFDIR}" ] && mkdir -p ${BACKUPBUFDIR} && lfs setstripe ${BACKUPBUFDIR} -s 32M -c 4
+#[ ! -d "${BACKUPBUFDIR}" ] && mkdir -p ${BACKUPBUFDIR} && lfs setstripe ${BACKUPBUFDIR} -s 32M -c 4
+[ ! -d "${BACKUPBUFDIR}" ] && mkdir -p ${BACKUPBUFDIR} && lfs setstripe ${BACKUPBUFDIR} -c 4
 echo "  BACKUPBUFDIR = ${BACKUPBUFDIR}"
 
 #[ ! -d "${TAPEDIR}" ] && echo "ERROR: no TAPEDIR=\"${TAPEDIR}\" found" && exit 1
@@ -27,6 +28,6 @@ echo "  OUTPUTDIR = ${OUTPUTDIR}"
 echo "  MODELDIR = ${MODELDIR}"
 
 #[ ! -d "${NESTINGDIR}" ] && echo "ERROR: no NESTINGDIR = \"${NESTINGDIR}\" found" && exit 1
-#echo "     NESTINGDIR = ${NESTINGDIR}"
+#echo "  NESTINGDIR = ${NESTINGDIR}"
 
 echo "  (directories OK)"

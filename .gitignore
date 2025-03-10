@@ -7,3 +7,5 @@ DATA
 figs
 *.png
 *.eps
+*.org
+main_test.sh

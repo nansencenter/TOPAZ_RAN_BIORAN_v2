@@ -1,6 +1,1 @@
-Bathymetry dumped by matlab(modified by addhuge.py)
-
-
-
-
-min,max depth =       5.000   5426.788
+/cluster/home/wakamatsut/TP2/NERSC-HYCOM-CICE_BIORANv2/TP2a0.10/topo/depth_TP2a0.10_04.b

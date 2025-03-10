@@ -10,7 +10,7 @@ HYCOMFILES=\
 "analysisfields.in
 analysisfields_ice.in
 blkdat.input
-depths800x760.uf
+depths.uf
 grid.info
 meanssh.uf
 re_sla.nc
@@ -48,11 +48,9 @@ echo -n "   Checking for necessary configuration files..."
 cd "${ANALYSISDIR}"
 for file in $HYCOMFILES
 do
-    if [ ! -r "$file" ]
-    then
+    if [ ! -r "$file" ]; then
 	cd ${CWD}
-	if [ -r "${FILESDIR}/${file}" ]
-        then
+	if [ -r "${FILESDIR}/${file}" ]; then
 	    cp ${FILESDIR}/${file} "${ANALYSISDIR}"
 	else
 	    echo
@@ -84,15 +82,13 @@ cd "${ANALYSISDIR}"
 
 for file in $ENKFFILES
 do
-    if [ ! -r -" $file" ]
-    then
+    if [ ! -r -" $file" ]; then
 	cd ${CWD}
-	if [ -r "${FILESDIR}/${file}" ]
-       then
+	if [ -r "${FILESDIR}/${file}" ]; then
 	    cp ${FILESDIR}/${file} "${ANALYSISDIR}"
 	else
 	    echo
-	    echo "ERROR: check_files.sh: \"$file\" not found"
+	    echo "ERROR: check_files.sh: \"$file\" not found in ${CWD}"
 	    exit 1
 	fi
     fi
@@ -100,15 +96,13 @@ done
 
 for file in $PRMFILES
 do
-    if [ ! -r -" $file" ]
-    then
+    if [ ! -r -" $file" ]; then
 	cd ${CWD}
-	if [ -r "${file}" ]
-        then
+	if [ -r "${file}" ]; then
 	    cp ${file} "${ANALYSISDIR}"
 	else
 	    echo
-	    echo "ERROR: check_files.sh: \"$file\" not found"
+	    echo "ERROR: check_files.sh: \"$file\" not found in ${CWD}"
 	    exit 1
 	fi
     fi
@@ -119,10 +113,9 @@ echo -n "   Checking for necessary executables..."
 cd "${BINDIR}"
 for file in $BINFILES
 do
-    if [ ! -x "$file" ]
-    then
+    if [ ! -x "$file" ]; then
 	echo
-        echo "ERROR: check_files.sh: \"$file\" not found"
+        echo "ERROR: check_files.sh: \"$file\" not found in ${BINDIR"
 	exit 1
     fi
 done

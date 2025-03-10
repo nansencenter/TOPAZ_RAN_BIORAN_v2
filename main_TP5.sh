@@ -41,7 +41,7 @@ do
 
         #[ -s Twostep ] && rm Twostep
         touch STOP
-        echo 'Initial assimilation: ${day}' > STOP
+        echo "Initial assimilation: ${day}" > STOP
 
 	cd ASSIM
 	echo "JULDAY=${day}" > assimilation_specs.sh
