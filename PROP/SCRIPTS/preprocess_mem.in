@@ -97,7 +97,7 @@ echo ${filenameice}
 echo "Cloning the ensemble subdirectory with perturbed forcing'"
 for imem in `seq $mem1 $mem2`; do
    cd ${Idir}       ||  { echo "Could not go to dir $SLURM_SUBMIT_DIR  "; exit 1; }
-   # setup the model information files
+echo $file   # setup the model information files
    Exdir=mem`echo 00${imem} | tail -4c`
    [ ! -r ${Exdir} ] && mkdir ${Exdir}
    [ -r ${Exdir}/hycom.stop ] && rm -rf ${Exdir}/hycom.stop
@@ -146,7 +146,7 @@ for imem in `seq $mem1 $mem2`; do
      echo " imem=${imem}"
      echo "replace ${Pervars} ... "
      for ifile in ${Pervars}; do
-       if [ -r tst.forcing.${ifile}.a -a -r tst.forcing.${ifile}.b ]; then
+         if [ -r tst.forcing.${ifile}.a -a -r tst.forcing.${ifile}.b ]; then
          rm forcing.${ifile}.[ab]
          ln -sf tst.forcing.${ifile}.a forcing.${ifile}.a
          ln -sf tst.forcing.${ifile}.b forcing.${ifile}.b

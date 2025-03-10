@@ -179,7 +179,7 @@ def main():
     for iy in range(year,year+1):
         YYYY=str(iy)
 
-        output_directory="./CMEMS/"+target
+        output_directory="/nird/projects/NS9481K/CMEMS/"+target
         target_date = obs_date
         target_datetime = datetime.strptime(target_date, "%Y%m%d")
 
@@ -206,7 +206,13 @@ def main():
             current_datetime = start_datetime
             while current_datetime <= end_datetime:
                 obs_date = current_datetime.strftime("%Y%m%d")
-                listname="*"+obs_date+"*.nc"
+                if target == "CMEMS_BGC_PF":
+                    #listname="*_PF_*.nc"
+                    listname="GL_PR_PF_7901106.nc"
+                elif target == "CMEMS_BGC_BO":
+                    listname="*_BO_*.nc"
+                else:
+                    listname="*"+obs_date+"*.nc"
                 print(listname)   
                 current_datetime += timedelta(days=1)
             
@@ -256,6 +262,9 @@ def main():
                     ncfile_list.append(file_path)
                     print("INFO - "+formatted_time+" - Successfully downloaded to "+file_path)
 
+            current_time_utc = datetime.utcnow()
+            formatted_time = current_time_utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+
             if isaggregate:
                  ncfile = tpvar+"_"+obs_date_range+".nc"
                  file_path = os.path.join(output_directory, ncfile)
@@ -266,14 +275,17 @@ def main():
                  aggregate_netcdf_cdo(file_path, file_path_out)
                  print("INFO - "+formatted_time+" - Successfully aggregated to "+file_path_out)
             else:
-                 work_directory = os.getcwd() # working directory
-                 os.chdir(output_directory)
-                 file_path = newest_file
-                 ncfile = tpvar+"_"+obs_date+".nc"
-                 symlink_path = ncfile
-                 os.symlink(file_path, symlink_path)
-                 os.chdir(work_directory)
-                 print("INFO - "+formatted_time+" - Successfully simlinked to "+output_directory+'/'+symlink_path)
+                 if target == "CMEMS_BGC_PF" or target == "CMEMS_BGC_BO":
+                    print("INFO - "+formatted_time+" - Successfully downloaded to "+output_directory)
+                 else:
+                    work_directory = os.getcwd() # working directory
+                    os.chdir(output_directory)
+                    file_path = newest_file
+                    ncfile = tpvar+"_"+obs_date+".nc"
+                    symlink_path = ncfile
+                    os.symlink(file_path, symlink_path)
+                    os.chdir(work_directory)
+                    print("INFO - "+formatted_time+" - Successfully simlinked to "+output_directory+'/'+symlink_path)
 
         if issubset:
 

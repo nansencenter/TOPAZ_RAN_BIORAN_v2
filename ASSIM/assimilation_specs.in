@@ -29,7 +29,7 @@ Obslink=/cluster/work/users/xiejp/work_2018/Data
 if [ ${OBSREADY} == 1 ]; then
  Tdir=$(pwd)
  cd ${OBSDIR}
- Obslink=/cluster/work/users/xiejp/TP2_Reanalysis/DATA
+ Obslink="${ROOTDIR}/DATA"
  o=0
  for obsty in ${OBSTYPES} ; do
    if [ -r ${obsty} ]; then
