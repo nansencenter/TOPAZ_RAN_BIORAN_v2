@@ -8,4 +8,5 @@ figs
 *.png
 *.eps
 *.org
+*.backup
 main_test.sh
