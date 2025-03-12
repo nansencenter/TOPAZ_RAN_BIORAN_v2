@@ -1,1 +1,1 @@
-/cluster/home/xiejp/enkf/EnKF-MPI-TOPAZ5/Tools/EnKF_assemble.sh
+/cluster/home/wakamatsut/bioran_v2/enkf-topaz_BIORANv2/Tools/EnKF_assemble.sh

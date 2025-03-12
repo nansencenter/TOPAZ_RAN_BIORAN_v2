@@ -69,7 +69,7 @@ datasets:
     PROCESSOR: ESA-CCI SST
     PROCESS_LEVEL: 4
     MODE: REP
-    PERIOD: 19810901-20161231
+    PERIOD: 19810901-20221031
     NCVAR: analysed_sst
     NCSTD: analysed_sst_uncertainty
     NCFLG: mask

@@ -110,12 +110,13 @@ done
 echo "OK"
 
 echo -n "   Checking for necessary executables..."
-cd "${BINDIR}"
+cd ${BINDIR}
 for file in $BINFILES
 do
+    echo $file
     if [ ! -x "$file" ]; then
 	echo
-        echo "ERROR: check_files.sh: \"$file\" not found in ${BINDIR"
+	echo "ERROR: check_files.sh: \"$file\" not found in ${BINDIR}"
 	exit 1
     fi
 done
