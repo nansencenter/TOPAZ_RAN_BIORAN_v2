@@ -1,24 +1,3 @@
-#!/bin/bash
-
-# parameters common to both propagation and assimilation
-#
-MSCPROGSBIN="/cluster/home/wakamatsut/bioran_v2/topaz_hyc/hycom/MSCPROGS/bin"
-ROOTDIR="/cluster/work/users/wakamatsut/bioran_v2"
-FORECASTDIR="${ROOTDIR}/FORECAST"
-TAPEDIR="${ROOTDIR}"
-BACKUPBUFDIR="${ROOTDIR}/TOBACKUP"
-RESULTSDIR="${ROOTDIR}/RESULTS"
-ANALYSISDIR="${ROOTDIR}/ANALYSIS"
-MODELDIR="${ROOTDIR}/TP2a0.10/expt_03.0"
-OUTPUTDIR="${ROOTDIR}/OUTPUT"
-NESTINGDIR="${ROOTDIR}/NESTING"
-HYCOMPREFIX="TP2"
-ENSSIZE=100
- 
-JULDAY=24462
-JULDAYNXT=24469
-JULDAYSTART=24350
-CWD=/cluster/home/wakamatsut/bioran_v2/topaz_ran/ASSIM
 # assimilation specific parameters
 #
 NPROC=72 # number of processors engaged in the EnKF analysis

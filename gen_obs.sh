@@ -1,10 +1,8 @@
 #!/bin/bash
 #
-# main_ran.sh
+# gen_obs.sh
 #
-# This the top level script for Topaz reanalysis 
-#
-# [2025.04.08: TW] enkf.prm is common to PHY and BGC DA at this moment.
+# This the top level script for run prepobs over analysis cycles
 #
 set -euo pipefail
 
@@ -13,6 +11,9 @@ datypes=("PHYDA" "BGCDA" "WCPLD") # leave this for later use to check valid DA t
 ynow=$1
 idini=$2
 idend=$3
+config=TP2
+
+PREOBSDIR=preobs_bgc
 
 schedule_file=schedule/cycle_${ynow}.txt
 
@@ -30,8 +31,8 @@ JULDAYSTART="${fields[1]}"
 
 echo "JULDAYSTART=$JULDAYSTART"
 
-source common_specs.sh # configure folder structure
-./SCRIPTS/check_directories.sh
+#source common_specs.sh # configure folder structure
+#./SCRIPTS/check_directories.sh
 
 while read -r line; do
     read -ra vars <<< "$line"
@@ -50,37 +51,30 @@ while read -r line; do
         echo "${vars[@]}"
         echo "-----------------------------------------"
 
-    #-- run assimilation
+    #-- run prepobs
 
     if [ ! "$datype" == "NODA" ]; then # only ensemble propagation
-        cd ASSIM
+	cd $PREOBSDIR
+
         #-- perform PHY DA
         if [ "$datype" == "PHYDA" ] || [ "$datype" == "WCPLD" ]; then # PHYDA or WCPLD
-	    bash submit_assimilation.sh $rfactor $gdaynow $jdaynow $jdaynxt $JULDAYSTART "PHY"
-        fi
+	   #-- SST
+           echo "bash prep_OSTIA_SST.sh   $gdaynow $config"
+	   bash prep_OSTIA_SST.sh $gdaynow $config
+	   #-- ICEC
+           echo "bash prep_OSISAF_ICEC.sh $gdaynow $config"
+	   bash prep_OSISAF_ICEC.sh $gdaynow $config
+	fi
+	
         #-- perform BGC DA
         if [ "$datype" == "BGCDA" ] || [ "$datype" == "WCPLD" ]; then # BGCDA or WCPLD
-	    bash submit_assimilation.sh $rfactor $gdaynow $jdaynow $jdaynxt $JULDAYSTART "BGC"
-        fi
-        cd ..
-
-        if [ -f STOP ]; then
-	    echo "Error in assimilation at cycle $cycleid, EXIT"
-            exit
-        fi
+	   #-- SCHL
+           echo "bash prep_ESACCI_SCHL.sh $gdaynow $config"
+	   bash prep_ESACCI_SCHL.sh $gdaynow $config
+	fi   
     fi
-
-    #-- run propagation
-    
-    cd PROP
-    bash submit_propagation.sh $gdaynow $gdaynxt $jdaynow $jdaynxt $JULDAYSTART 
-    cd ..
-
-    if [ -f STOP ]; then
-	echo "Error in propagation at cycle $cycleid, EXIT"
-        exit
-    fi
-    
-    fi
+	
+	cd ..
+    fi	
     
 done < ${schedule_file}

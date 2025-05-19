@@ -4,7 +4,7 @@ set -e # exit on error
 set -u # exit on unset variables
 
 CWD=`pwd`
-. ./assimilation_specs.sh
+#. ./assimilation_specs.sh
 
 HYCOMFILES=\
 "analysisfields.in
@@ -27,6 +27,7 @@ regional.depth.b"
 
 BINFILES=\
 "jultodate
+datetojul
 EnKF
 EnKF_assemble.sh
 EnKF_assemble
@@ -43,25 +44,10 @@ ENKFFILES=\
 PRMFILES=\
 "enkf.prm"
 
-echo -n "   Checking for necessary configuration files..."
-
-cd "${ANALYSISDIR}"
-for file in $HYCOMFILES
-do
-    if [ ! -r "$file" ]; then
-	cd ${CWD}
-	if [ -r "${FILESDIR}/${file}" ]; then
-	    cp ${FILESDIR}/${file} "${ANALYSISDIR}"
-	else
-	    echo
-	    echo "ERROR: check_files.sh: \"$file\" not found"
-	    exit 1
-	fi
-    fi
-    ln -sf ${ANALYSISDIR}/$file $PREPOBSDIR
-done
+echo "     Checking for necessary configuration files..."
 
 #cd "${PREPOBSDIR}"
+#
 #for file in $OBSFILES
 #do
 #    if [ ! -r "$file" ]
@@ -75,10 +61,27 @@ done
 #	    echo "ERROR: check_files.sh: \"$file\" not found"
 #	    exit 1
 #	fi
+#       echo "      ${PREPOBSDIR}/$file"
 #    fi
 #done
 
-cd "${ANALYSISDIR}"
+cd ${ANALYSISDIR}
+
+for file in $HYCOMFILES
+do
+    if [ ! -r "$file" ]; then
+	cd ${CWD}
+	if [ -r "${FILESDIR}/${file}" ]; then
+	    cp ${FILESDIR}/${file} "${ANALYSISDIR}"
+	else
+	    echo
+	    echo "ERROR: check_files.sh: \"$file\" not found"
+	    exit 1
+	fi
+        echo "      ${ANALYSISDIR}/$file"
+    fi
+    ln -sf ${ANALYSISDIR}/$file $PREPOBSDIR
+done
 
 for file in $ENKFFILES
 do
@@ -91,6 +94,7 @@ do
 	    echo "ERROR: check_files.sh: \"$file\" not found in ${CWD}"
 	    exit 1
 	fi
+        echo "      ${ANALYSISDIR}/$file"
     fi
 done
 
@@ -105,19 +109,23 @@ do
 	    echo "ERROR: check_files.sh: \"$file\" not found in ${CWD}"
 	    exit 1
 	fi
+        echo "      ${ANALYSISDIR}/$file"
     fi
 done
-echo "OK"
+echo "     OK"
 
-echo -n "   Checking for necessary executables..."
+echo "     Checking for necessary executables..."
+
 cd ${BINDIR}
+
 for file in $BINFILES
 do
-    echo $file
     if [ ! -x "$file" ]; then
 	echo
 	echo "ERROR: check_files.sh: \"$file\" not found in ${BINDIR}"
 	exit 1
     fi
+    echo "      ${BINDIR}/$file"
+    #echo "      ${ANALYSISDIR}/$file"
 done
-echo "OK"
+echo "     OK"

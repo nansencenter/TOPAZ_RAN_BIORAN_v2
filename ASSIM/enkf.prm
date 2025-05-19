@@ -10,7 +10,7 @@
 /
 &moderation
 	infl = 1.01
-	rfactor1 = 1
+	rfactor1 = 2
 	rfactor2 = 2.0
 	kfactor = 2.0
 /

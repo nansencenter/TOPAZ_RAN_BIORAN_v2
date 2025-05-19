@@ -1,6 +1,7 @@
 #!/bin/bash
+set -u
 
-gdate=20190601   # Gregorian date [YYYYMMDD]
+gdate=$1         # Gregorian date [YYYYMMDD]
 CNFG=TP2         # short name of hycom configuration [TP5|TP2]
 DSRC=ESACCI_SCHL # name of dataset
 DVAR=SCHL        # name of parameter

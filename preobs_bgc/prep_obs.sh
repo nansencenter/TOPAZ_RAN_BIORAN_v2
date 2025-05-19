@@ -5,20 +5,20 @@
 
 gdate=$1 # Gregorian date [YYYYMMDD]
 CNFG=$2  # short name of hycom configuration [TP5|TP2]
-DSRC=$3  # name of dataset [OSTIA_SST|OCCI_SCHL|]
-DVAR=$4  # name of parameter [SST|ICEC|SCHL]
+DSRC=$3  # name of dataset [OSTIA_SST|OSISAF_ICES|OCCI_SCHL|CMEMS_CORA|CMEMS_SSH]
+DVAR=$4  # name of parameter [SST|ICEC|SCHL|TEM|SAL|SLA]
 
 sys_dir=/cluster/home/wakamatsut/bioran_v2 # TOPAZ reanalysis sytem folder
 
-ran_dir=${sys_dir}/topaz_ran             # absolute path to reanalysis package
-hyc_dir=${sys_dir}/topaz_hyc             # absolute path to hycom package
-enkf_dir=${sys_dir}/topaz_enkf           # absolute path to enkf package
-dobs_dir=${ran_dir}/preobs_bgc/CMEMS/$DSRC   # absolute path to original observation files
+ran_dir=${sys_dir}/topaz_ran               # absolute path to reanalysis package
+hyc_dir=${sys_dir}/topaz_hyc               # absolute path to hycom package
+enkf_dir=${sys_dir}/topaz_enkf             # absolute path to enkf package
+dobs_dir=${ran_dir}/preobs_bgc/CMEMS/$DSRC # absolute path to original observation files
 
 cnfg_dir=${ran_dir}/CONFIG/$CNFG         # hycom configuration files (copy from topo folder)
-infl_dir=${ran_dir}/preobs_bgc/Infile        # template of inile.data
-work_dir=${ran_dir}/preobs_bgc/TMP           # scratch folder
-pobs_dir=${ran_dir}/DATA/${CNFG}/${DSRC}/${DVAR} # pre processed observation files by prepobs
+infl_dir=${ran_dir}/preobs_bgc/Infile    # template of infile.data
+work_dir=${ran_dir}/preobs_bgc/TMP       # scratch folder
+pobs_dir=${ran_dir}/DATA/${CNFG}/${DSRC}/${DVAR} # pre-processed observation files by prepobs
 
 fdobs=${dobs_dir}/${DVAR}_${gdate}.nc  # input data file (e.g. SST_20190101.nc)
 
@@ -67,6 +67,7 @@ if [[ ! -s "${Fnc}" || ! -s "${Fuf}" ]]; then
     rm -rf ${Fini} 
 else
     echo "Both $(basename ${Fnc}) and $(basename ${Fuf}) exist, SKIP"
+    echo ".. check the files under ${pobs_dir}"
 fi
 
 popd > /dev/null

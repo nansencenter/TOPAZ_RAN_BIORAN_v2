@@ -1,0 +1,44 @@
+# assimilation specific parameters
+#
+NPROC=72 # number of processors engaged in the EnKF analysis
+
+# Possible observation types:
+#
+# SCHL - Satellite total chlorophyll-a
+# CHL  - in-situ chlorophyll
+# NIT  - in-situ nitrate
+# SIL  - in-situ silicate
+# PHO  - in-situ phosphate
+#
+OBSTYPES="SCHL NIT SIL PHO CHL"        # List of observation types
+
+# do not edit below unless you have to
+#
+PREPOBSDIR="${ROOTDIR}/PREPOBS"
+OBSDIR="${ROOTDIR}/OBS"
+CWD=`pwd`
+BINDIR=`pwd`"/BIN"
+FILESDIR=`pwd`"/FILES"
+
+# check if listed observations types are available
+#
+echo ""
+echo "     check observations"
+
+OBSREADY=1    # else =0
+if [ ${OBSREADY} == 1 ]; then
+    pushd ${OBSDIR} > /dev/null
+    echo "      in $PWD"
+    count=0
+    for obstype in ${OBSTYPES}; do
+	if [ -d $obstype ]; then
+	    echo "$obstype"
+	    count=$(expr $count + 1)
+	fi
+    done
+    popd > /dev/null
+    if [ $count == 0 ]; then
+	echo "Ther is no observations"
+	OBSREADY=0
+    fi
+fi

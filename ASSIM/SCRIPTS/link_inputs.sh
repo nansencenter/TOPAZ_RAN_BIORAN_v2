@@ -3,9 +3,9 @@
 set -e # exit on error
 set -u # exit on unset variables
 set -o pipefail
-set -x
+#set -x
 
-. assimilation_specs.sh
+#. assimilation_specs.sh
 
 echo "   Date:"
 echo "     JULDAY = ${JULDAY}"
@@ -34,14 +34,8 @@ yearprev=`jultodate $juldayprev 1950 1 1 | cut -c1-4`
 Sdate=$(jultodate ${iday} 1950 1 1)
 Strdate=${Sdate:0:4}-${Sdate:4:2}-${Sdate:6:2}
 
-#forecast_prefix="${FORECASTDIR}/${HYCOMPREFIX}restart${year}_${day}_00"
-#modeldaily_prefix="${FORECASTDIR}/${HYCOMPREFIX}DAILY_${yearprev}_${dayprev}"
 forecast_prefix="${FORECASTDIR}/restart.${year}_${day}_00_0000"
-
-#modeldaily_prefix="${FORECASTDIR}/archm.${yearprev}_${dayprev}"
-# modified in TP5: (the previous date are indicated before 7 days)
 modeldaily_prefix="${FORECASTDIR}/archm."   
-
 forecast_ice_prefix="${FORECASTDIR}/cice/iced.${Strdate}-00000"
 
 # for checking -----hycom restart

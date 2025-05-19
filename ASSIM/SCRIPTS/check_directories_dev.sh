@@ -3,7 +3,7 @@
 set -e # exit on error
 set -u # exit on unset variables
 
-#. assimilation_specs.sh #[2025.04.28] !TW commented out to avoid its 2nd call
+echo "     -- Check directories for assimilation"
 
 [ ! -d "${BINDIR}" ] && echo "assimilate.sh: ERROR: BINDIR = \"${BINDIR}\": no such directory" && exit 1
 echo "     BINDIR = ${BINDIR}"

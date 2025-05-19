@@ -132,8 +132,8 @@ elif test.lower() == 'false':
     
 #-- Geographical and temporal filter
 bbox = {"longitude": [-180, 180],
-        "latitude": [50, 90],
-        "time":['1997-01-01',year+'-12-31']}
+        "latitude": [40, 90],
+        "time":['1996-01-01',year+'-12-31']}
 
 #-- Instrument filter
 #instrument = "PF"  # autonomous float data
@@ -145,7 +145,7 @@ bbox = {"longitude": [-180, 180],
 #var = "ox"
 
 #-- Storage
-data_directory = f"./data"
+data_directory = f"./CMEMS"
 
 #-----------------------------------
 # Fetch list of download files

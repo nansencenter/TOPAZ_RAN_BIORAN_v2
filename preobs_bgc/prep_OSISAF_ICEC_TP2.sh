@@ -1,6 +1,6 @@
 #!/bin/bash
 
-gdate=20190601   # Gregorian date [YYYYMMDD]
+gdate=20190101   # Gregorian date [YYYYMMDD]
 CNFG=TP2         # short name of hycom configuration [TP5|TP2]
 DSRC=OSISAF_ICEC # name of dataset
 DVAR=ICEC        # name of parameter

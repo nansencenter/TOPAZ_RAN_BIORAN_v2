@@ -1,0 +1,4 @@
+IFREMER         ! institute
+SAL            ! observation type
+0.02            ! error variance
+20190101_SAL.nc

@@ -20,6 +20,9 @@ pushd BIN
 [ -f jultodate ] && rm jultodate
 ln -sf ${HYCOM_BIN}/jultodate .
 
+[ -f datetojul ] && rm datetojul
+ln -sf ${HYCOM_BIN}/datetojul .
+
 popd
 
 #----------------------------------
@@ -45,6 +48,7 @@ do
 done
    
 ln -sf ../../BIN/jultodate .
+ln -sf ../../BIN/datetojul .
 ln -sf ../../SSHFromState_HYCOMICE/restart2nc  .
 ln -sf ../../SSHFromState_HYCOMICE/extract2ssh .
 

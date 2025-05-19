@@ -3,7 +3,7 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from matplotlib.patches import FancyBboxPatch
 import matplotlib
 import matplotlib.pyplot as plt
-matplotlib.use('TkAgg')  # Use an interactive backend
+#matplotlib.use('TkAgg')  # Use an interactive backend
 import pylab as pl
 import netCDF4 as nc
 import numpy as np
@@ -153,7 +153,7 @@ plt.tight_layout()
 
 # save figure
 
-plt.show()
+#plt.show()
 pl.savefig(file_path,dpi=300)
 plt.close()
 
@@ -262,7 +262,7 @@ plt.tight_layout()
 
 # save figure
 
-plt.show()
+#plt.show()
 pl.savefig(file_path,dpi=300)
 plt.close()
 

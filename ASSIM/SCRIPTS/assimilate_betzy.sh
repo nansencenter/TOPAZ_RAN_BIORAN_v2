@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # File: assimilate.sh
 # Author : Pavel Sakov # Date: 11 January 2010
 # Corrected by Jiping Xie # Date: 5 June 2019

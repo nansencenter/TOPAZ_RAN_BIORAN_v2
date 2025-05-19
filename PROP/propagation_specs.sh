@@ -2,25 +2,20 @@
 
 # parameters common to both propagation and assimilation
 #
-ROOTDIR="/cluster/work/users/xiejp/TP5_Reanalysis"
+MSCPROGSBIN="/cluster/home/wakamatsut/bioran_v2/topaz_hyc/hycom/MSCPROGS/bin"
+ROOTDIR="/cluster/work/users/wakamatsut/bioran_v2"
 FORECASTDIR="${ROOTDIR}/FORECAST"
-TAPEDIR="/cluster/work/users/xiejp/TP5_Reanalysis"
+TAPEDIR="${ROOTDIR}"
 BACKUPBUFDIR="${ROOTDIR}/TOBACKUP"
 RESULTSDIR="${ROOTDIR}/RESULTS"
 ANALYSISDIR="${ROOTDIR}/ANALYSIS"
-MODELDIR="/cluster/work/users/xiejp/TOPAZ/TP5a0.06/expt_04.1"
+MODELDIR="${ROOTDIR}/TP2a0.10/expt_03.0"
 OUTPUTDIR="${ROOTDIR}/OUTPUT"
 NESTINGDIR="${ROOTDIR}/NESTING"
-HYCOMPREFIX="TP5"
+HYCOMPREFIX="TP2"
 ENSSIZE=100
-# propagation specific parameters
-#
-
-# do not edit below
-#
-EXPT=expt_04.0
-EXPT_short=${EXPT#expt_}
-CWD=`pwd`
-INFILEDIR="${CWD}/INFILE"
-BINDIR="${CWD}/BIN"
-JULDAY=25999
+ 
+JULDAY=24462
+JULDAYNXT=24469
+JULDAYSTART=24350
+CWD=/cluster/home/wakamatsut/bioran_v2/topaz_ran/PROP

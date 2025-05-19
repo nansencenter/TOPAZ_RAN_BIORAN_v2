@@ -1,10 +1,11 @@
 #!/bin/bash
+set -u
 
-gdate=20160901   # Gregorian date [YYYYMMDD]
-CNFG=TP2         # short name of hycom configuration [TP5|TP2]
-DSRC=CMEMS_SCHL  # name of dataset
-DVAR=SCHL        # name of parameter
-isplot="true"    # plot/save on map projections
+gdate=$1        # Gregorian date [YYYYMMDD]
+CNFG=$2         # short name of hycom configuration [TP5|TP2]
+DSRC=OSTIA_SST  # name of dataset
+DVAR=SST        # name of parameter
+isplot="false"  # if true, plot/save observations-SST.nc on map projections
 
 if [ ! -s CMEMS/${DSRC}/${DVAR}_${gdate}.nc ]; then
   echo "#-------------------------"
