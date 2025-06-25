@@ -31,7 +31,7 @@ nre=0 # number of members reassembled
 # 1. Read and report specifications for the assimilation
 #
 echo "1. Reading specifications and checking configuration:"
-source assimilation_specs.sh
+. ./assimilation_specs.sh
 export ANALYSISDIR BINDIR RESULTSDIR JULDAY ENSSIZE NPROC FORECASTDIR BACKUPBUFDIR MODELDIR HYCOMPREFIX PREPOBSDIR OUTPUTDIR NESTINGDIR OBSDIR ROOTDIR
 
 echo "   JULDAY = ${JULDAY}"
@@ -40,44 +40,4 @@ echo "   JULDAY = ${JULDAY}"
 #
 rm -rf ${ANALYSISDIR} ${PREPOBSDIR}
 mkdir ${ANALYSISDIR}
-
-echo "   Data types:"
-for datatype in $OBSTYPES
-do
-    echo "     $datatype"
-done
-
-echo "   Directories:"
-./SCRIPTS/check_directories.sh
-
-echo "   EnKF parameters:"
-cat enkf.prm | awk '{print "     "$0}'
-
-./SCRIPTS/check_files.sh
-
-
-#
-# 2. Prepare observations of each type
-#
-echo "2. Preparing observations:"
-echo "   "`date`
-
-# for each obs type dowbnload observations and run prep_obs
-#
-for obstype in ${OBSTYPES}
-do
-    echo "   $obstype:"
-    echo "${PREPOBSDIR}/observations.uf.${obstype}" 
-    if [ -s ${PREPOBSDIR}/observations.uf.${obstype} ]; then
-      rm ${PREPOBSDIR}/observations.uf.${obstype} 
-    fi
-    cd ${CWD}
-    if [ ${OBSREADY} -eq 0 ]; then
-      # to create the observations.uf
-      ./SCRIPTS/${obstype}/get_obs.sh
-    else
-      # to link the observations.uf
-      echo "OBSDIR="${OBSDIR}
-    fi
-done
 
