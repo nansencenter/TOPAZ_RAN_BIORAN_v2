@@ -5,8 +5,10 @@
 
 gdate=$1 # Gregorian date [YYYYMMDD]
 CNFG=$2  # short name of hycom configuration [TP5|TP2]
-DSRC=$3  # name of dataset [OSTIA_SST|OSISAF_ICES|OCCI_SCHL|CMEMS_CORA|CMEMS_SSH]
-DVAR=$4  # name of parameter [SST|ICEC|SCHL|TEM|SAL|SLA]
+DSRC=$3  # name of dataset [OSTIA_SST|OSISAF_ICEC|OCCI_SCHL|CMEMS_CORA|CMEMS_SSH|BGC_bottle]
+DVAR=$4  # name of parameter [SST|ICEC|SCHL|TEM|SAL|SLA|SCH|OXY|NIT|SIL|PHO]
+
+echo $gdate $CNFG $DSRC $DVAR
 
 sys_dir=/cluster/home/wakamatsut/bioran_v2 # TOPAZ reanalysis sytem folder
 
@@ -20,7 +22,11 @@ infl_dir=${ran_dir}/preobs_bgc/Infile    # template of infile.data
 work_dir=${ran_dir}/preobs_bgc/TMP       # scratch folder
 pobs_dir=${ran_dir}/DATA/${CNFG}/${DSRC}/${DVAR} # pre-processed observation files by prepobs
 
-fdobs=${dobs_dir}/${DVAR}_${gdate}.nc  # input data file (e.g. SST_20190101.nc)
+if [ "$DSRC" = "BGC_bottle" ]; then
+    fdobs=${dobs_dir}/${DVAR,,}_${gdate}.txt  # input data file (e.g. SST_20190101.nc)
+else
+    fdobs=${dobs_dir}/${DVAR}_${gdate}.nc  # input data file (e.g. SST_20190101.nc)
+fi    
 
 mkdir -p ${pobs_dir}
 mkdir -p ${work_dir}
@@ -42,14 +48,20 @@ PATH=$PATH:${hyc_dir}/hycom/MSCPROGS/bin:${enkf_dir}/Prep_Routines
 Fnc=${pobs_dir}/obs_${DVAR}_${gdate}.nc
 Fuf=${pobs_dir}/obs_${DVAR}_${gdate}.uf
 
-Fini=${gdate}_${DVAR,,}.nc
+if [ "$DSRC" = "BGC_bottle" ]; then
+    Fini=${DVAR,,}_${gdate}.txt
+    infile=infile.data.${DSRC}_${DVAR}
+else    
+    Fini=${gdate}_${DVAR,,}.nc
+    infile=infile.data.$DSRC
+fi    
 
 if [[ ! -s "${Fnc}" || ! -s "${Fuf}" ]]; then
-    if [ -s ${infl_dir}/infile.data.$DSRC ]; then
-       sed "s/SDATE/${gdate}/" ${infl_dir}/infile.data.$DSRC > infile.data
+    if [ -s ${infl_dir}/$infile ]; then
+       sed "s/SDATE/${gdate}/" ${infl_dir}/$infile > infile.data
        cat infile.data
     else
-       echo "Can not find ${infl_dir}/infile.data.$DSRC , EXIT"
+       echo "Can not find ${infl_dir}/$infile , EXIT"
        exit
     fi
     if [ -s ${fdobs} ]; then

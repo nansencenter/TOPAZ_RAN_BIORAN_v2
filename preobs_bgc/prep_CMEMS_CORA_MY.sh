@@ -6,8 +6,8 @@ set -u
 
 gdate=$1           # Gregorian date [YYYYMMDD]
 CNFG=$2            # short name of hycom configuration [TP5|TP2]
+isload=$3          # load data files or not [true/false]
 DSRC=CMEMS_CORA_MY # short name of dataset
-isload="false"     # load files or not
 
 #
 
