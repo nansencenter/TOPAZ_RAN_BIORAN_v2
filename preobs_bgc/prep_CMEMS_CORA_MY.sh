@@ -24,7 +24,8 @@ swork_dir=${ran_dir}/preobs_bgc/TMP       # scratch folder
 
 #-- define available instrument types
 #list_type=("BO" "CT" "SM" "BA" "GL" "OS" "RE" "TE" "XT" "PF")
-list_type=("BO" "CT" "XT" "PF")
+#list_type=("BO" "CT" "XT" "PF")
+list_type=("PF")
 
 if $isload; then
     types_string=$(IFS=' '; echo "${list_type[*]}")

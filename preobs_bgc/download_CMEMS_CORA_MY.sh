@@ -5,7 +5,8 @@ isload="true"
 
 #-- define available instrument types
 #list_type=("BO" "CT" "SM" "BA" "GL" "OS" "RE" "TE" "XT" "PF")
-list_type=("BO" "CT" "XT" "PF")
+#list_type=("BO" "CT" "XT" "PF")
+list_type=("PF")
 
 types_string=$(IFS=' '; echo "${list_type[*]}")
 echo "#-------------------------"
